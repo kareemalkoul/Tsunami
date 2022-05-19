@@ -3,10 +3,10 @@
 #pragma kernel ForceCS
 #pragma kernel IntegrateCS
 
-// 簡略化のためにスレッド数は1次元にしておく
+// Keep the number of threads one-dimensional for simplicity
 #define THREAD_SIZE_X 1024
 
-// ▼ 構造化バッファの定義 ---------------------
+// ▼ Structured buffer definition ---------------------
 struct Particle {
 	float3 position;
 	float3 velocity;

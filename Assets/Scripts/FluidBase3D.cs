@@ -13,34 +13,35 @@ namespace Kodai.Fluid.SPH {
 
     public abstract class FluidBase3D<T> : MonoBehaviour where T : struct {
 
-        [SerializeField] protected NumParticleEnum particleNum = NumParticleEnum.NUM_8K;    // パーティクルの個数
-        [SerializeField] protected float smoothlen = 0.012f;                                // 粒子半径
-        [SerializeField] private float pressureStiffness = 200.0f;                          // 圧力項係数
-        [SerializeField] protected float restDensity = 1000.0f;                             // 静止密度
-        [SerializeField] protected float particleMass = 0.0002f;                            // 粒子質量
-        [SerializeField] protected float viscosity = 0.1f;                                  // 粘性係数
-        [SerializeField] protected float maxAllowableTimestep = 0.005f;                     // 時間刻み幅
-        [SerializeField] protected float wallStiffness = 3000.0f;                           // ペナルティ法の壁の力
-        [SerializeField] protected int iterations = 4;                                      // シミュレーションの1フレーム当たりのイテレーション回数
-        [SerializeField] protected Vector3 gravity = new Vector3(0.0f, -0.5f, 0.0f);        // 重力
-        [SerializeField] protected Vector3 range = new Vector3(1, 1, 1);                    // シミュレーション空間
-        [SerializeField] protected bool simulate = true;                                    // シミュレーション実行 or 一時停止
+        [SerializeField] protected NumParticleEnum particleNum = NumParticleEnum.NUM_8K;    // Number of particles
+        [SerializeField] protected float smoothlen = 0.012f;                                // Particle radius
+        [SerializeField] private float pressureStiffness = 200.0f;                          // Pressure term coefficient
+        [SerializeField] protected float restDensity = 1000.0f;                             // resting density
+        [SerializeField] protected float particleMass = 0.0002f;                            // particle mass
+        [SerializeField] protected float viscosity = 0.1f;                                  // Viscosity coefficient
+        [SerializeField] protected float maxAllowableTimestep = 0.005f;                     // Time step width
+        [SerializeField] protected float wallStiffness = 3000.0f;                           // The power of the wall of penalty law
+        [SerializeField] protected int iterations = 4;                                      // Number of iterations per frame of simulation
+        [SerializeField] protected Vector3 gravity = new Vector3(0.0f, -0.5f, 0.0f);        // gravity
+        [SerializeField] protected Vector3 range = new Vector3(1, 1, 1);                    // Simulation space
+        [SerializeField] protected bool simulate = true;                                    // Simulation execution or stop for a while
 
-        private int numParticles;                                                           // パーティクルの個数
-        private float timeStep;                                                             // 時間刻み幅
-        private float densityCoef;                                                          // Poly6カーネルの密度係数
-        private float gradPressureCoef;                                                     // Spikyカーネルの圧力係数
-        private float lapViscosityCoef;                                                     // Laplacianカーネルの粘性係数
+        private int numParticles;                                                           // Number of particles
+        private float timeStep;                                                             // Time step width
+        private float densityCoef;                                                          // Poly6 kernel density coefficient //TODO: this three var is ambigant and confuse
+        private float gradPressureCoef;                                                     // Pressure coefficient of Spiky kernel
+        private float lapViscosityCoef;                                                     // Viscosity coefficient of Laplacian kernel
 
         #region DirectCompute
         private ComputeShader fluidCS;
-        private static readonly int THREAD_SIZE_X = 1024;                                   // コンピュートシェーダ側のスレッド数
-        private ComputeBuffer particlesBufferRead;                                          // 粒子のデータを保持するバッファ
-        private ComputeBuffer particlesBufferWrite;                                         // 粒子のデータを書き込むバッファ
-        private ComputeBuffer particlesPressureBuffer;                                      // 粒子の圧力データを保持するバッファ
-        private ComputeBuffer particleDensitiesBuffer;                                      // 粒子の密度データを保持するバッファ
-        private ComputeBuffer particleForcesBuffer;                                         // 粒子の加速度データを保持するバッファ
-        private ComputeBuffer debugBuffer;                                                  // デバッグ用バッファ
+        private static readonly int THREAD_SIZE_X = 1024;                                   // Number of threads on the compute shader side
+        private ComputeBuffer particlesBufferRead;                                          // Buffer to hold particle data
+        private ComputeBuffer particlesBufferWrite;                                         // Buffer to write particle data
+        private ComputeBuffer particlesPressureBuffer;                                      // A buffer that holds particle pressure dataA buffer that holds particle pressure data
+        private ComputeBuffer particleDensitiesBuffer;                                      // Buffer that holds particle density data
+        private ComputeBuffer particleForcesBuffer;                                         // Buffer that holds particle acceleration data
+        private ComputeBuffer debugBuffer;                                                  // Debug buffer
+
         #endregion
 
         #region Accessor
@@ -51,6 +52,7 @@ namespace Kodai.Fluid.SPH {
         public ComputeBuffer ParticlesBufferRead {
             get { return particlesBufferRead; }
         }
+
         #endregion
 
         #region Mono
@@ -64,22 +66,24 @@ namespace Kodai.Fluid.SPH {
         }
 
         private void Update() {
-
+            
+            //this condition for stop simulation for a time
             if (!simulate) {
                 return;
             }
 
+            //if maxAllowableTimestep is more than the delta time between curr frame and prev frame 
+            //then make time step is delta time 
+            //this maintaple happen when the maxAllowableTimestep is big than deltaTime
+            // cause like move 2 second in compusting and is in 1 seconds in showing 
             timeStep = Mathf.Min(maxAllowableTimestep, Time.deltaTime);
 
-            // 2Dカーネル係数
-            //densityCoef = particleMass * 4f / (Mathf.PI * Mathf.Pow(smoothlen, 8));                     // Poly6 2D用
-            densityCoef = particleMass * 315f / (64f * Mathf.PI * Mathf.Pow(smoothlen, 9));             // Poly6 3D用
-            //gradPressureCoef = particleMass * -30.0f / (Mathf.PI * Mathf.Pow(smoothlen, 5));            // Spiky 2D用
-            gradPressureCoef = particleMass * -45.0f / (Mathf.PI * Mathf.Pow(smoothlen, 6));            // Spiky 3D用
-            //lapViscosityCoef = particleMass * 20f / (3 * Mathf.PI * Mathf.Pow(smoothlen, 5));           // Viscosity 2D用
-            lapViscosityCoef = particleMass * 45f / (Mathf.PI * Mathf.Pow(smoothlen, 6));               // Viscosity 3D用
+            // 3D kernel coefficient
+            densityCoef = particleMass * 315f / (64f * Mathf.PI * Mathf.Pow(smoothlen, 9));             // Poly6 for 3D
+            gradPressureCoef = particleMass * -45.0f / (Mathf.PI * Mathf.Pow(smoothlen, 6));            // Spiky for 3D
+            lapViscosityCoef = particleMass * 45f / (Mathf.PI * Mathf.Pow(smoothlen, 6));               // Viscosity for 3D
 
-            // シェーダー定数の転送
+            // Transfer of shader constants
             fluidCS.SetInt("_NumParticles", numParticles);
             fluidCS.SetFloat("_TimeStep", timeStep);
             fluidCS.SetFloat("_Smoothlen", smoothlen);
@@ -95,7 +99,7 @@ namespace Kodai.Fluid.SPH {
 
             AdditionalCSParams(fluidCS);
 
-            // 計算精度を上げるために時間刻み幅を小さくして複数回イテレーションする
+            // Repeat several times in smaller time steps to improve the accuracy of the calculation.
             for (int i = 0; i<iterations; i++) {
                 RunFluidSolver();
             }
@@ -109,14 +113,18 @@ namespace Kodai.Fluid.SPH {
             DeleteBuffer(particleDensitiesBuffer);
             DeleteBuffer(particleForcesBuffer);
         }
+       
         #endregion Mono
 
         /// <summary>
-        /// 流体シミュレーションメインルーチン
+        /// Fluid simulation main routine
         /// </summary>
         private void RunFluidSolver() {
 
+            // TODO:why -1 ? is -1 for init the value?
             int kernelID = -1;
+            // num of particle to each Thread
+            //if 1K particles then 1 for each thread ,2 for 2k and 4 for 4k ,...etc.because the numParticles n*1.024 and the size_x is 1024
             int threadGroupsX = numParticles / THREAD_SIZE_X;
 
             // Density
@@ -154,41 +162,41 @@ namespace Kodai.Fluid.SPH {
                 if (eachResult < 0) Debug.Log(eachResult);
             }
 
-            SwapComputeBuffer(ref particlesBufferRead, ref particlesBufferWrite);   // バッファの入れ替え
+            SwapComputeBuffer(ref particlesBufferRead, ref particlesBufferWrite);   // Swapping buffers
         }
 
         /// <summary>
-        /// 子クラスでシェーダー定数の転送を追加する場合はこのメソッドを利用する
+        /// Use this method if you want to add a transfer of shader constants in a child class
         /// </summary>
         /// <param name="shader"></param>
         protected virtual void AdditionalCSParams(ComputeShader shader) { }
 
         /// <summary>
-        /// パーティクル初期位置と初速の設定
+        /// Particle initial position and initial velocity setting
         /// </summary>
         /// <param name="particles"></param>
         protected abstract void InitParticleData(ref T[] particles);
 
         /// <summary>
-        /// バッファの初期化
+        /// Buffer initialization
         /// </summary>
         private void InitBuffers() {
-            particlesBufferRead = new ComputeBuffer(numParticles, Marshal.SizeOf(typeof(T)));
             var particles = new T[numParticles];
             InitParticleData(ref particles);
             particlesBufferRead.SetData(particles);
-            particles = null;
+            particles = null;   //TODO:why null?
 
-            debugBuffer = new ComputeBuffer(numParticles, sizeof(float));
-
+            particlesBufferRead = new ComputeBuffer(numParticles, Marshal.SizeOf(typeof(T)));
             particlesBufferWrite = new ComputeBuffer(numParticles, Marshal.SizeOf(typeof(T)));
             particlesPressureBuffer = new ComputeBuffer(numParticles, Marshal.SizeOf(typeof(FluidParticlePressure)));
             particleForcesBuffer = new ComputeBuffer(numParticles, Marshal.SizeOf(typeof(FluidParticleForces3D)));
             particleDensitiesBuffer = new ComputeBuffer(numParticles, Marshal.SizeOf(typeof(FluidParticleDensity)));
+            debugBuffer = new ComputeBuffer(numParticles, sizeof(float));
+
         }
 
         /// <summary>
-        /// 引数に指定されたバッファの入れ替え
+        /// Swap the buffer specified in the argument
         /// </summary>
         private void SwapComputeBuffer(ref ComputeBuffer ping, ref ComputeBuffer pong) {
             ComputeBuffer temp = ping;
@@ -197,7 +205,7 @@ namespace Kodai.Fluid.SPH {
         }
 
         /// <summary>
-        /// バッファの開放
+        /// Free buffer
         /// </summary>
         /// <param name="buffer"></param>
         private void DeleteBuffer(ComputeBuffer buffer) {
