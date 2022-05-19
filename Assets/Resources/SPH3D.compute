@@ -26,49 +26,49 @@ struct ParticleDensity {
 
 RWStructuredBuffer<float>			_DebugBuffer;
 
-// 粒子位置と速度を保持するバッファ
+// Buffer to hold particle position and velocity
 StructuredBuffer  <Particle>        _ParticlesBufferRead;
 RWStructuredBuffer<Particle>        _ParticlesBufferWrite;
 
-// 粒子密度を保持するバッファ
+// Buffer to hold particle density
 StructuredBuffer  <ParticleDensity> _ParticlesDensityBufferRead;
 RWStructuredBuffer<ParticleDensity> _ParticlesDensityBufferWrite;
 
-// 粒子圧力を保持するバッファ
+// Buffer to hold particle pressure
 StructuredBuffer<ParticlePressure>	_ParticlesPressureBufferRead;
 RWStructuredBuffer<ParticlePressure> _ParticlesPressureBufferWrite;
 
-// 粒子加速度(力)を保持するバッファ
+// Buffer that holds particle acceleration (force)
 StructuredBuffer  <ParticleForces>  _ParticlesForceBufferRead;
 RWStructuredBuffer<ParticleForces>  _ParticlesForceBufferWrite;
-// ▲ 構造化バッファの定義 ---------------------
+// ▲ Structured buffer definition ---------------------
 
-// ▼ シェーダ定数の定義 -----------------------
+// ▼ Definition of shader constants -----------------------
 cbuffer CB {
-	int   _NumParticles;		// 粒子数
-	float _TimeStep;			// 時間刻み幅(dt)
-	float _Smoothlen;			// 粒子半径
-	float _PressureStiffness;	// Beckerの係数
-	float _RestDensity;			// 静止密度
-	float _DensityCoef;			// 密度算出時の係数
-	float _GradPressureCoef;	// 圧力算出時の係数
-	float _LapViscosityCoef;	// 粘性算出時の係数
-	float _WallStiffness;		// ペナルティ法の押し返す力
-	float _Viscosity;			// 粘性係数
-	float3 _Gravity;			// 重力
-	float3 _Range;				// シミュレーション空間
+	int   _NumParticles;		// Number of particles
+	float _TimeStep;			// Time step width (dt)
+	float _Smoothlen;			// Particle radius
+	float _PressureStiffness;	// Becker's coefficient
+	float _RestDensity;			// resting density
+	float _DensityCoef;			// Coefficient when calculating density
+	float _GradPressureCoef;	// Coefficient when calculating pressure
+	float _LapViscosityCoef;	// Coefficient when calculating viscosity
+	float _WallStiffness;		// The pushing force of the penalty method
+	float _Viscosity;			// Viscosity coefficient
+	float3 _Gravity;			// gravity
+	float3 _Range;				// Simulation space
 
 	//float3 _MousePos;			// マウス位置
 	//float _MouseRadius;			// マウスインタラクションの半径
 	//bool _MouseDown;			// マウスが押されているか
 };
-// ▲ シェーダ定数の定義 -----------------------
+// ▲ Definition of shader constants -----------------------
 
 
 
-// ▼ ★ここから本体 --------------------------------------
+// ▼ ★ Main body from here --------------------------------------
 
-/// Poly6 Kernel の実装
+/// Implementation of Poly6 Kernel 
 /// http://www.slis.tsukuba.ac.jp/~fujisawa.makoto.fu/cgi-bin/wiki/index.php?SPH%CB%A1%A4%CE%BD%C5%A4%DF%B4%D8%BF%F4
 /// W_poly6(r, h) = DensityCoef * (h^2 - r^2)^3
 /// -> DensityCoef = ParticleMass * 4 / (PI * Smoothlen^8)
@@ -77,144 +77,151 @@ inline float CalculateDensity(float r_sq) {
 	return _DensityCoef * (h_sq - r_sq) * (h_sq - r_sq) * (h_sq - r_sq);
 }
 
-/// Becker2007 非圧縮条件の実装:
+/// Becker2007 Implementation of uncompressed conditions:
 /// Pressure = B * ((rho / rho_0)^gamma  - 1)
-/// 圧力定数Bは正確に計算するべきだが、リアルタイム向きではないので適当な値にする
+/// The pressure constant B should be calculated accurately, but it is not suitable for real time, so set it to an appropriate value.
 inline float CalculatePressure(float density) {
 	return _PressureStiffness * max(pow(abs(density / _RestDensity), 7) - 1, 0);
 }
 
-/// Spikyカーネルの実装:
-/// mass * (pressure_i- pressure_j)/(2 * density_j) * Grad(W_Spiky)
+/// Implementation of Spiky kernel
+/// mass * ((pressure_i- pressure_j)/(2 * density_j)) * Grad(W_Spiky)
 /// Grad(W_Spiky) = -30 / (pi * h^5) * (h - r)^2
 inline float3 CalculateGradPressure(float r, float P_pressure, float N_pressure, float N_density, float3 diff) {
 	const float h = _Smoothlen;
 	float avg_pressure = 0.5f * (N_pressure + P_pressure);
+	// _GradPressureCoef = particleMass * -45.0f / (Mathf.PI * Mathf.Pow(smoothlen, 6))
+	// N=j
+	// P=i curr particle
+	// float3 Grad=W_Spiky=_GradPressureCoef*(h - r) * (h - r) * diff / r;
 	return _GradPressureCoef * avg_pressure / N_density * (h - r) * (h - r) / r * (diff);
 }
 
-/// Viscosityカーネルの実装:
+/// Viscosity kernel implementation:
 /// mass * (u_j - u_i) / density_j * Laplacian(W_viscosity)
 /// Laplacian(W_viscosity) = 20 / (3 * pi * h^5) * (h - r)
 inline float3 CalculateLapVelocity(float r, float3 P_velocity, float3 N_velocity, float N_density) {
 	const float h = _Smoothlen;
+	// _LapViscosityCoef= particleMass * 45f / (Mathf.PI * Mathf.Pow(smoothlen, 6))
+	// N=j
+	// P=i curr particle
 	float3 vel_diff = (N_velocity - P_velocity);
 	return _LapViscosityCoef / N_density * (h - r) * vel_diff;
 }
 
 
 
-// ▼ カーネル関数
+// ▼ Kernel function
 
 //--------------------------------------------------------------------------------------
-// 密度の算出
+// Density calculation
 //--------------------------------------------------------------------------------------
 [numthreads(THREAD_SIZE_X, 1, 1)]
 void DensityCS(uint3 DTid : SV_DispatchThreadID) {
-	uint P_ID = DTid.x;	// 現在処理しているパーティクルID
+	uint P_ID = DTid.x;	// Particle ID currently being processed
 
 	float h_sq = _Smoothlen * _Smoothlen;
 	float3 P_position = _ParticlesBufferRead[P_ID].position;
 
-	// 近傍探索(O(n^2))
+	// Neighborhood search(O(n^2))
 	float density = 0;
 	for (uint N_ID = 0; N_ID < (uint)_NumParticles; N_ID++) {
 		if (N_ID == P_ID) continue;	// 自身を計算対象とした場合スキップ
 
 		float3 N_position = _ParticlesBufferRead[N_ID].position;
 
-		float3 diff = N_position - P_position;	// 粒子距離
-		float r_sq = dot(diff, diff);			// 粒子距離の2乗
+		float3 diff = N_position - P_position;	// Particle distance
+		float r_sq = dot(diff, diff);			// Particle distance squared
 
-		// 半径内に収まっていない粒子は除外
+		// Exclude particles that do not fit within the radius
 		if (r_sq < h_sq) {
-			density += CalculateDensity(r_sq);	// わざわざルートをとる必要がない
+			density += CalculateDensity(r_sq);	// No need to take the route
 		}
 	}
 
-	// 密度バッファを更新
+	// Update density buffer
 	_ParticlesDensityBufferWrite[P_ID].density = density;
 }
 
 
 //--------------------------------------------------------------------------------------
-// 圧力の算出
+// Pressure calculation
 //--------------------------------------------------------------------------------------
 [numthreads(THREAD_SIZE_X, 1, 1)]
 void PressureCS(uint3 DTid : SV_DispatchThreadID) {
-	uint P_ID = DTid.x;	// 現在処理しているパーティクルID
+	uint P_ID = DTid.x;	// Particle ID currently being processed
 
 	float  P_density = _ParticlesDensityBufferRead[P_ID].density;	// 先程算出した密度
 	float  P_pressure = CalculatePressure(P_density);	// 圧力の計算
 
-	// 圧力バッファを更新
+	// Update pressure buffer
 	_ParticlesPressureBufferWrite[P_ID].pressure = P_pressure;
 }
 
 
 //--------------------------------------------------------------------------------------
-// 力(加速度)の算出
+// Calculation of force (acceleration)
 //--------------------------------------------------------------------------------------
 [numthreads(THREAD_SIZE_X, 1, 1)]
 void ForceCS(uint3 DTid : SV_DispatchThreadID) {
-	uint P_ID = DTid.x; // 現在処理しているパーティクルID
+	uint P_ID = DTid.x; // Particle ID currently being processed
 
 	float3 P_position = _ParticlesBufferRead[P_ID].position;
 	float3 P_velocity = _ParticlesBufferRead[P_ID].velocity;
-	float  P_density = _ParticlesDensityBufferRead[P_ID].density;		// 先程算出した密度
-	float  P_pressure = _ParticlesPressureBufferRead[P_ID].pressure;	// 先程算出した圧力
+	float  P_density = _ParticlesDensityBufferRead[P_ID].density;		// Density calculated earlier
+	float  P_pressure = _ParticlesPressureBufferRead[P_ID].pressure;	// The pressure calculated earlier
 
 	const float h_sq = _Smoothlen * _Smoothlen;
 
-	// 近傍探索(O(n^2))
+	// Neighborhood search(O(n^2))
 	float3 press = float3(0, 0, 0);
 	float3 visco = float3(0, 0, 0);
 	for (uint N_ID = 0; N_ID < (uint)_NumParticles; N_ID++) {
-		if (N_ID == P_ID) continue;	// 自身を対象とした場合スキップ
+		if (N_ID == P_ID) continue;	// Skip if targeting yourself
 
 		float3 N_position = _ParticlesBufferRead[N_ID].position;
 
 		float3 diff = N_position - P_position;
 		float r_sq = dot(diff, diff);
 
-		// 半径内に収まっていない粒子は除外
+		// Exclude particles that do not fit within the radius
 		if (r_sq < h_sq) {	
 			float  N_density = _ParticlesDensityBufferRead[N_ID].density;
 			float  N_pressure = _ParticlesPressureBufferRead[N_ID].pressure;
 			float3 N_velocity = _ParticlesBufferRead[N_ID].velocity;
 			float  r = sqrt(r_sq);
 
-			// 圧力項
+			// Pressure term
 			press += CalculateGradPressure(r, P_pressure, N_pressure, N_density, diff);
 
-			// 粘性項
+			// sticky item
 			visco += CalculateLapVelocity(r, P_velocity, N_velocity, N_density);
 		}
 	}
 
-	// 統合
+	// Integration
 	float3 force = press + _Viscosity * visco;
 
-	// 加速度バッファの更新
+	// Acceleration buffer update
 	_ParticlesForceBufferWrite[P_ID].acceleration = force / P_density;
 }
 
 
 //--------------------------------------------------------------------------------------
-// 衝突判定などを行って、位置を更新
+// Update the position by performing collision detection etc.
 //--------------------------------------------------------------------------------------
 [numthreads(THREAD_SIZE_X, 1, 1)]
 void IntegrateCS(uint3 DTid : SV_DispatchThreadID) {
-	const unsigned int P_ID = DTid.x; // 現在処理しているパーティクルID
+	const unsigned int P_ID = DTid.x; // Particle ID currently being processed
 
-	// 更新前の位置と速度
+	// Position and speed before update
 	float3 position = _ParticlesBufferRead[P_ID].position;
 	float3 velocity = _ParticlesBufferRead[P_ID].velocity;
-	float3 acceleration = _ParticlesForceBufferRead[P_ID].acceleration;	// 計算した加速度
+	float3 acceleration = _ParticlesForceBufferRead[P_ID].acceleration;	// Calculated acceleration
 
-	// 衝突判定を書くならここ -----
+	// Here to write collision detection -----
 
-	// 壁境界(ペナルティ法)
+	// Wall boundary (penalty method)
 	float dist;
 	dist = dot(float4(position, 1), float4(1, 0, 0, 0));
 	acceleration += min(dist, 0) * -_WallStiffness * float3(1, 0, 0);
@@ -234,14 +241,14 @@ void IntegrateCS(uint3 DTid : SV_DispatchThreadID) {
 	dist = dot(float4(position, 1), float4(0, 0, -1, _Range.z));
 	acceleration += min(dist, 0) * -_WallStiffness * float3(0, 0, -1);
 
-	// 重力の加算
+	// Gravity addition
 	acceleration += _Gravity;
 
-	// 前進オイラー法で次の粒子位置を更新
+	// Update the next particle position with the forward Euler method
 	velocity += _TimeStep * acceleration;
 	position += _TimeStep * velocity;
 
-	// パーティクルのバッファ更新
+	// Particle buffer update
 	_ParticlesBufferWrite[P_ID].position = position;
 	_ParticlesBufferWrite[P_ID].velocity = velocity;
 }
