@@ -123,13 +123,15 @@ void DensityCS(uint3 DTid : SV_DispatchThreadID) {
 	float h_sq = _Smoothlen * _Smoothlen;
 	float3 P_position = _ParticlesBufferRead[P_ID].position;
 
+	// TODO:convert To hash
 	// Neighborhood search(O(n^2))
 	float density = 0;
 	for (uint N_ID = 0; N_ID < (uint)_NumParticles; N_ID++) {
-		if (N_ID == P_ID) continue;	// 自身を計算対象とした場合スキップ
+		if (N_ID == P_ID) continue;	// Skip if self is the calculation target
 
 		float3 N_position = _ParticlesBufferRead[N_ID].position;
-
+		// N=j
+		// P=i
 		float3 diff = N_position - P_position;	// Particle distance
 		float r_sq = dot(diff, diff);			// Particle distance squared
 
@@ -145,14 +147,14 @@ void DensityCS(uint3 DTid : SV_DispatchThreadID) {
 
 
 //--------------------------------------------------------------------------------------
-// Pressure calculation
+// Pressure calculation ///  equation Tait
 //--------------------------------------------------------------------------------------
 [numthreads(THREAD_SIZE_X, 1, 1)]
 void PressureCS(uint3 DTid : SV_DispatchThreadID) {
 	uint P_ID = DTid.x;	// Particle ID currently being processed
 
-	float  P_density = _ParticlesDensityBufferRead[P_ID].density;	// 先程算出した密度
-	float  P_pressure = CalculatePressure(P_density);	// 圧力の計算
+	float  P_density = _ParticlesDensityBufferRead[P_ID].density;	// Density calculated earlier
+	float  P_pressure = CalculatePressure(P_density);	// Pressure calculation
 
 	// Update pressure buffer
 	_ParticlesPressureBufferWrite[P_ID].pressure = P_pressure;
@@ -172,7 +174,8 @@ void ForceCS(uint3 DTid : SV_DispatchThreadID) {
 	float  P_pressure = _ParticlesPressureBufferRead[P_ID].pressure;	// The pressure calculated earlier
 
 	const float h_sq = _Smoothlen * _Smoothlen;
-
+	//N=j
+	//P=i
 	// Neighborhood search(O(n^2))
 	float3 press = float3(0, 0, 0);
 	float3 visco = float3(0, 0, 0);
@@ -223,25 +226,27 @@ void IntegrateCS(uint3 DTid : SV_DispatchThreadID) {
 
 	// Wall boundary (penalty method)
 	float dist;
+	//x in 0
 	dist = dot(float4(position, 1), float4(1, 0, 0, 0));
 	acceleration += min(dist, 0) * -_WallStiffness * float3(1, 0, 0);
-
+	//y in 0
 	dist = dot(float4(position, 1), float4(0, 1, 0, 0));
 	acceleration += min(dist, 0) * -_WallStiffness * float3(0, 1, 0);
-
+	//z in 0
 	dist = dot(float4(position, 1), float4(0, 0, 1, 0));
 	acceleration += min(dist, 0) * -_WallStiffness * float3(0, 0, 1);
-
+	//x in max
 	dist = dot(float4(position, 1), float4(-1, 0, 0, _Range.x));
 	acceleration += min(dist, 0) * -_WallStiffness * float3(-1, 0, 0);
-
+	//y in max
 	dist = dot(float4(position, 1), float4(0, -1, 0, _Range.y));
 	acceleration += min(dist, 0) * -_WallStiffness * float3(0, -1, 0);
-
+	//z in max
 	dist = dot(float4(position, 1), float4(0, 0, -1, _Range.z));
 	acceleration += min(dist, 0) * -_WallStiffness * float3(0, 0, -1);
 
 	// Gravity addition
+	//TODO:must _Gravity*_mass
 	acceleration += _Gravity;
 
 	// Update the next particle position with the forward Euler method

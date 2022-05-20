@@ -160,7 +160,10 @@ namespace Kodai.Fluid.SPH {
             foreach (var eachResult in result)
             {
                 if (eachResult < 0) Debug.Log(eachResult);
+
+               
             }
+             Debug.Log("eachResult");
 
             SwapComputeBuffer(ref particlesBufferRead, ref particlesBufferWrite);   // Swapping buffers
         }
@@ -183,10 +186,11 @@ namespace Kodai.Fluid.SPH {
         private void InitBuffers() {
             var particles = new T[numParticles];
             InitParticleData(ref particles);
+            particlesBufferRead = new ComputeBuffer(numParticles, Marshal.SizeOf(typeof(T)));
             particlesBufferRead.SetData(particles);
             particles = null;   //TODO:why null?
 
-            particlesBufferRead = new ComputeBuffer(numParticles, Marshal.SizeOf(typeof(T)));
+           
             particlesBufferWrite = new ComputeBuffer(numParticles, Marshal.SizeOf(typeof(T)));
             particlesPressureBuffer = new ComputeBuffer(numParticles, Marshal.SizeOf(typeof(FluidParticlePressure)));
             particleForcesBuffer = new ComputeBuffer(numParticles, Marshal.SizeOf(typeof(FluidParticleForces3D)));
