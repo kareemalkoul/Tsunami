@@ -11,6 +11,7 @@ namespace Kodai.Fluid.SPH {
         public Color WaterColor;
 
         void OnRenderObject() {
+            Debug.Log("asdas");
             DrawParticle();
         }
 
