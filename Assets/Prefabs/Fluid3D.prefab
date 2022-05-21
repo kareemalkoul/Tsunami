@@ -54,7 +54,7 @@ MonoBehaviour:
   wallStiffness: 3000
   iterations: 4
   gravity: {x: 0, y: -10, z: 0}
-  range: {x: 16, y: 10, z: 16}
+  range: {x: 5, y: 9, z: 5}
   simulate: 1
   ballRadius: 5
   MouseInteractionRadius: 1.5
@@ -72,4 +72,4 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   solver: {fileID: 361318686889559026}
   RenderParticleMat: {fileID: 2100000, guid: 79b8e4e87d0027242b76475f51be3f57, type: 2}
-  WaterColor: {r: 1, g: 0, b: 0.09249592, a: 1}
+  WaterColor: {r: 0, g: 0.7042556, b: 1, a: 1}
