@@ -5,7 +5,7 @@ namespace Kareem.Fluid.SPH
 {
 
     [RequireComponent(typeof(Fluid3D))]
-    public class FluidRenderer3D : MonoBehaviour
+    public class FluidRenderer3DWithoutSahders : MonoBehaviour
     {
 
         public Fluid3D solver;

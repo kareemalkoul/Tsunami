@@ -1,7 +1,7 @@
 ﻿using UnityEngine;
 using System.Runtime.InteropServices;
 
-namespace Kodai.Fluid.SPH {
+namespace Kareem.Fluid.SPH {
     public struct FluidParticle {
         public Vector2 Position;
         public Vector2 Velocity;

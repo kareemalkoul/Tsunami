@@ -1,7 +1,7 @@
 ﻿using UnityEngine;
 using System.Runtime.InteropServices;
 
-namespace Kodai.Fluid.SPH
+namespace Kareem.Fluid.SPH
 {
     public struct FluidParticle3D
     {

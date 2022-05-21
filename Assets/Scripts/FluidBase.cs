@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Runtime.InteropServices;
 using UnityEngine;
 
-namespace Kodai.Fluid.SPH
+namespace Kareem.Fluid.SPH
 {
 
     public enum NumParticleEnum

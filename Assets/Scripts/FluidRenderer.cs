@@ -1,7 +1,7 @@
 ﻿using UnityEngine;
 using System.Collections;
 
-namespace Kodai.Fluid.SPH {
+namespace Kareem.Fluid.SPH {
 
     [RequireComponent(typeof(Fluid2D))]
     public class FluidRenderer : MonoBehaviour {
