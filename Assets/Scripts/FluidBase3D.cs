@@ -3,7 +3,8 @@ using System.Collections.Generic;
 using System.Runtime.InteropServices;
 using UnityEngine;
 
-namespace Kodai.Fluid.SPH {
+namespace Kodai.Fluid.SPH
+{
 
 
     struct FluidParticleForces3D
@@ -11,7 +12,8 @@ namespace Kodai.Fluid.SPH {
         public Vector3 Acceleration;
     };
 
-    public abstract class FluidBase3D<T> : MonoBehaviour where T : struct {
+    public abstract class FluidBase3D<T> : MonoBehaviour where T : struct
+    {
 
         [SerializeField] protected NumParticleEnum particleNum = NumParticleEnum.NUM_8K;    // Number of particles
         [SerializeField] protected float smoothlen = 0.012f;                                // Particle radius
@@ -25,15 +27,21 @@ namespace Kodai.Fluid.SPH {
         [SerializeField] protected Vector3 gravity = new Vector3(0.0f, -0.5f, 0.0f);        // gravity
         [SerializeField] protected Vector3 range = new Vector3(1, 1, 1);                    // Simulation space
         [SerializeField] protected bool simulate = true;                                    // Simulation execution or stop for a while
+        [SerializeField] protected float tensionThreshold = 0.7f;
+        [SerializeField] protected float tensionCoefficient = 0.0728f;
+
 
         private int numParticles;                                                           // Number of particles
         private float timeStep;                                                             // Time step width
-        private float densityCoef;                                                          // Poly6 kernel density coefficient //TODO: this three var is ambigant and confuse
+        private float densityCoef;                                                          // Poly6 kernel density coefficient 
         private float gradPressureCoef;                                                     // Pressure coefficient of Spiky kernel
-        private float lapViscosityCoef;                                                     // Viscosity coefficient of Laplacian kernel
+        private float lapViscosityCoef;                                                     // Viscosity coefficient of Laplacian kernel  
+        private float lapTensionCoef;                                                       // Tension coefficient of Laplacian kernel
+        private float gradTensionCoef;                                                      // Tension coefficient of grad kernel
+
 
         #region DirectCompute
-        private ComputeShader fluidCS;
+        [SerializeField] ComputeShader fluidCS;
         private static readonly int THREAD_SIZE_X = 1024;                                   // Number of threads on the compute shader side
         private ComputeBuffer particlesBufferRead;                                          // Buffer to hold particle data
         private ComputeBuffer particlesBufferWrite;                                         // Buffer to write particle data
@@ -45,30 +53,42 @@ namespace Kodai.Fluid.SPH {
         #endregion
 
         #region Accessor
-        public int NumParticles {
+        public int NumParticles
+        {
             get { return numParticles; }
         }
 
-        public ComputeBuffer ParticlesBufferRead {
+        public Vector3 Range
+        {
+            get { return range; }
+        }
+
+        public ComputeBuffer ParticlesBufferRead
+        {
             get { return particlesBufferRead; }
         }
 
         #endregion
 
         #region Mono
-        protected virtual void Awake() {
-            fluidCS = (ComputeShader)Resources.Load("SPH3D");
+        protected virtual void Awake()
+        {
+            if (fluidCS == null)
+                fluidCS = (ComputeShader)Resources.Load("SPH3D");
             numParticles = (int)particleNum;
-        } 
+        }
 
-        protected virtual void Start() {
+        protected virtual void Start()
+        {
             InitBuffers();
         }
 
-        private void Update() {
-            
+        private void Update()
+        {
+
             //this condition for stop simulation for a time
-            if (!simulate) {
+            if (!simulate)
+            {
                 return;
             }
 
@@ -79,15 +99,22 @@ namespace Kodai.Fluid.SPH {
             timeStep = Mathf.Min(maxAllowableTimestep, Time.deltaTime);
 
             // 3D kernel coefficient
+            //valvulate constant with eachgather
             densityCoef = particleMass * 315f / (64f * Mathf.PI * Mathf.Pow(smoothlen, 9));             // Poly6 for 3D
             gradPressureCoef = particleMass * -45.0f / (Mathf.PI * Mathf.Pow(smoothlen, 6));            // Spiky for 3D
             lapViscosityCoef = particleMass * 45f / (Mathf.PI * Mathf.Pow(smoothlen, 6));               // Viscosity for 3D
+            gradTensionCoef = particleMass * -24 / (32 * Mathf.PI * Mathf.Pow(smoothlen, 9));           // Poly6 for 3D
+            lapTensionCoef = particleMass * -945 / (32 * Mathf.PI * Mathf.Pow(smoothlen, 9));            // Poly6 for 3D
 
             // Transfer of shader constants
             fluidCS.SetInt("_NumParticles", numParticles);
             fluidCS.SetFloat("_TimeStep", timeStep);
             fluidCS.SetFloat("_Smoothlen", smoothlen);
             fluidCS.SetFloat("_PressureStiffness", pressureStiffness);
+            fluidCS.SetFloat("_GradTensionCoef", gradTensionCoef);
+            fluidCS.SetFloat("_LapTensionCoef", lapTensionCoef);
+            fluidCS.SetFloat("_tensionThreshold", tensionThreshold);
+            fluidCS.SetFloat("_tensionCoefficient", tensionCoefficient);
             fluidCS.SetFloat("_RestDensity", restDensity);
             fluidCS.SetFloat("_Viscosity", viscosity);
             fluidCS.SetFloat("_DensityCoef", densityCoef);
@@ -100,12 +127,14 @@ namespace Kodai.Fluid.SPH {
             AdditionalCSParams(fluidCS);
 
             // Repeat several times in smaller time steps to improve the accuracy of the calculation.
-            for (int i = 0; i<iterations; i++) {
+            for (int i = 0; i < iterations; i++)
+            {
                 RunFluidSolver();
             }
         }
 
-        private void OnDestroy() {
+        private void OnDestroy()
+        {
             DeleteBuffer(debugBuffer);
             DeleteBuffer(particlesBufferRead);
             DeleteBuffer(particlesBufferWrite);
@@ -113,13 +142,14 @@ namespace Kodai.Fluid.SPH {
             DeleteBuffer(particleDensitiesBuffer);
             DeleteBuffer(particleForcesBuffer);
         }
-       
+
         #endregion Mono
 
         /// <summary>
         /// Fluid simulation main routine
         /// </summary>
-        private void RunFluidSolver() {
+        private void RunFluidSolver()
+        {
 
             // TODO:why -1 ? is -1 for init the value?
             int kernelID = -1;
@@ -180,7 +210,8 @@ namespace Kodai.Fluid.SPH {
         /// <summary>
         /// Buffer initialization
         /// </summary>
-        private void InitBuffers() {
+        private void InitBuffers()
+        {
             var particles = new T[numParticles];
             InitParticleData(ref particles);
             particlesBufferRead = new ComputeBuffer(numParticles, Marshal.SizeOf(typeof(T)));
@@ -198,7 +229,8 @@ namespace Kodai.Fluid.SPH {
         /// <summary>
         /// Swap the buffer specified in the argument
         /// </summary>
-        private void SwapComputeBuffer(ref ComputeBuffer ping, ref ComputeBuffer pong) {
+        private void SwapComputeBuffer(ref ComputeBuffer ping, ref ComputeBuffer pong)
+        {
             ComputeBuffer temp = ping;
             ping = pong;
             pong = temp;
@@ -208,8 +240,10 @@ namespace Kodai.Fluid.SPH {
         /// Free buffer
         /// </summary>
         /// <param name="buffer"></param>
-        private void DeleteBuffer(ComputeBuffer buffer) {
-            if (buffer != null) {
+        private void DeleteBuffer(ComputeBuffer buffer)
+        {
+            if (buffer != null)
+            {
                 buffer.Release();
                 buffer = null;
             }

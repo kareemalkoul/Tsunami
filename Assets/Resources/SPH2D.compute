@@ -24,6 +24,12 @@ struct ParticleDensity {
 	float density;
 };
 
+struct ColorField {
+	float colorField;
+	float colorLaplacian;
+	float2 colorGradient;
+};
+
 // 粒子位置と速度を保持するバッファ
 StructuredBuffer  <Particle>        _ParticlesBufferRead;
 RWStructuredBuffer<Particle>        _ParticlesBufferWrite;
@@ -55,6 +61,10 @@ cbuffer CB {
 	float _Viscosity;			// 粘性係数
 	float2 _Gravity;			// 重力
 	float2 _Range;				// シミュレーション空間
+	float _tensionThreshold;	//Tension Threshold
+	float _tensionCoefficient;	//Tension Coefficient
+	float _GradTensionCoef;		// Coefficient when calculating Tension
+	float _LapTensionCoef;		// Coefficient when calculating Tension
 
 	float3 _MousePos;			// マウス位置
 	float _MouseRadius;			// マウスインタラクションの半径
@@ -99,6 +109,48 @@ inline float2 CalculateLapVelocity(float r, float2 P_velocity, float2 N_velocity
 	float2 vel_diff = (N_velocity - P_velocity);
 	return _LapViscosityCoef / N_density * (h - r) * vel_diff;
 }
+
+inline ColorField CalculateSurfaceTension(float r_sq , float N_density, float2 diff)
+{
+	//diff =r=ri-rj
+	//N=j is neighbors
+	//p=i
+	ColorField color;
+	float colorField = 0.0f;
+	float2 colorGradient = float2(0,0);
+	float colorLaplacian = 0.0f;
+	float tensionCoefficient = 0.0728f;
+	const float h = _Smoothlen;
+	const float h_sq = _Smoothlen * _Smoothlen;
+	// const float r_sq = r * r;
+
+	// colorField += j.mass / j.density * Kernel.Poly6(i.position - j.position, h);
+	colorGradient=_GradTensionCoef*diff * (h_sq - r_sq) *(h_sq - r_sq) /N_density;
+  
+	// colorGradient += j.mass / j.density * Kernel.Poly6Grad(i.position - j.position, h);
+
+
+	colorLaplacian=_LapTensionCoef * (h_sq - r_sq) *(3 *(pow(h ,3))-7*r_sq)/N_density;
+
+	// colorLaplacian += j.mass / j.density * Kernel.Poly6Lap(i.position - j.position, h);
+
+
+
+	float sqrMagnitude=colorGradient.x*colorGradient.x+colorGradient.y*colorGradient.y;
+	if (sqrMagnitude < _tensionThreshold * _tensionThreshold)
+	{
+		// This particle isn't close to the surface
+		return color;
+	}
+
+	color.colorField=colorField;
+	color.colorLaplacian=colorLaplacian;
+	color.colorGradient=colorGradient;
+	// float tension=-tensionCoefficient*colorLaplacian*colorGradient/colorField
+
+	return color;
+}
+
 
 
 
@@ -163,7 +215,8 @@ void ForceCS(uint3 DTid : SV_DispatchThreadID) {
 	float  P_pressure = _ParticlesPressureBufferRead[P_ID].pressure;	// 先程算出した圧力
 
 	const float h_sq = _Smoothlen * _Smoothlen;
-
+	ColorField temp;	
+	ColorField color;
 	// 近傍探索(O(n^2))
 	float2 press = float2(0, 0);
 	float2 visco = float2(0, 0);
@@ -187,11 +240,21 @@ void ForceCS(uint3 DTid : SV_DispatchThreadID) {
 
 			// 粘性項
 			visco += CalculateLapVelocity(r, P_velocity, N_velocity, N_density);
+
+			temp=CalculateSurfaceTension(r_sq,N_density,diff);
+			color.colorGradient+=temp.colorGradient;
+			color.colorLaplacian+=temp.colorLaplacian;
+
 		}
 	}
 
+	float2 colorGradient=color.colorGradient;
+	float madntiude=sqrt(colorGradient.x*colorGradient.x + colorGradient.y*colorGradient.y );
+	float2 tension=-_tensionCoefficient*color.colorLaplacian*color.colorGradient/madntiude;
+	// tension=float2(0,0);
+
 	// 統合
-	float2 force = press + _Viscosity * visco;
+	float2 force = press + _Viscosity * visco + tension;
 
 	// 加速度バッファの更新
 	_ParticlesForceBufferWrite[P_ID].acceleration = force / P_density;

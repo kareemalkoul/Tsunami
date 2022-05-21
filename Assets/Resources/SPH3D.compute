@@ -24,6 +24,12 @@ struct ParticleDensity {
 	float density;
 };
 
+struct ColorField {
+	float colorField;
+	float colorLaplacian;
+	float3 colorGradient;
+};
+
 RWStructuredBuffer<float>			_DebugBuffer;
 
 // Buffer to hold particle position and velocity
@@ -53,14 +59,18 @@ cbuffer CB {
 	float _DensityCoef;			// Coefficient when calculating density
 	float _GradPressureCoef;	// Coefficient when calculating pressure
 	float _LapViscosityCoef;	// Coefficient when calculating viscosity
+	float _GradTensionCoef;		// Coefficient when calculating Tension
+	float _LapTensionCoef;		// Coefficient when calculating Tension
 	float _WallStiffness;		// The pushing force of the penalty method
 	float _Viscosity;			// Viscosity coefficient
 	float3 _Gravity;			// gravity
 	float3 _Range;				// Simulation space
+	float _tensionThreshold;	//Tension Threshold
+	float _tensionCoefficient;	//Tension Coefficient
 
-	//float3 _MousePos;			// マウス位置
-	//float _MouseRadius;			// マウスインタラクションの半径
-	//bool _MouseDown;			// マウスが押されているか
+	float3 _MousePos;			// Mouse position
+	float _MouseRadius;			// Radius of mouse interaction
+	bool _MouseDown;			// Is the mouse pressed
 };
 // ▲ Definition of shader constants -----------------------
 
@@ -85,7 +95,7 @@ inline float CalculatePressure(float density) {
 }
 
 /// Implementation of Spiky kernel
-/// mass * ((pressure_i- pressure_j)/(2 * density_j)) * Grad(W_Spiky)
+/// mass * ((pressure_i + pressure_j)/(2 * density_j)) * Grad(W_Spiky)
 /// Grad(W_Spiky) = -30 / (pi * h^5) * (h - r)^2
 inline float3 CalculateGradPressure(float r, float P_pressure, float N_pressure, float N_density, float3 diff) {
 	const float h = _Smoothlen;
@@ -109,6 +119,47 @@ inline float3 CalculateLapVelocity(float r, float3 P_velocity, float3 N_velocity
 	return _LapViscosityCoef / N_density * (h - r) * vel_diff;
 }
 
+inline ColorField CalculateSurfaceTension(float r_sq , float N_density, float3 diff)
+{
+	//diff =r=ri-rj
+	//N=j is neighbors
+	//p=i
+	ColorField color;
+	float colorField = 0.0f;
+	float3 colorGradient = float3(0,0,0);
+	float colorLaplacian = 0.0f;
+	float tensionCoefficient = 0.0728f;
+	const float h = _Smoothlen;
+	const float h_sq = _Smoothlen * _Smoothlen;
+	// const float r_sq = r * r;
+
+	// colorField += j.mass / j.density * Kernel.Poly6(i.position - j.position, h);
+	colorGradient=_GradTensionCoef*diff * (h_sq - r_sq) *(h_sq - r_sq) /N_density;
+  
+	// colorGradient += j.mass / j.density * Kernel.Poly6Grad(i.position - j.position, h);
+
+
+	colorLaplacian=_LapTensionCoef * (h_sq - r_sq) *(3 *(pow(h ,3))-7*r_sq)/N_density;
+
+	// colorLaplacian += j.mass / j.density * Kernel.Poly6Lap(i.position - j.position, h);
+
+
+
+	float sqrMagnitude=colorGradient.x*colorGradient.x+colorGradient.y*colorGradient.y+colorGradient.z*colorGradient.z;
+	if (sqrMagnitude < _tensionThreshold * _tensionThreshold)
+	{
+		// This particle isn't close to the surface
+		return color;
+	}
+
+	color.colorField=colorField;
+	color.colorLaplacian=colorLaplacian;
+	color.colorGradient=colorGradient;
+	// float tension=-tensionCoefficient*colorLaplacian*colorGradient/colorField
+
+	return color;
+}
+
 
 
 // ▼ Kernel function
@@ -123,13 +174,15 @@ void DensityCS(uint3 DTid : SV_DispatchThreadID) {
 	float h_sq = _Smoothlen * _Smoothlen;
 	float3 P_position = _ParticlesBufferRead[P_ID].position;
 
+	// TODO:convert To hash
 	// Neighborhood search(O(n^2))
 	float density = 0;
 	for (uint N_ID = 0; N_ID < (uint)_NumParticles; N_ID++) {
-		if (N_ID == P_ID) continue;	// 自身を計算対象とした場合スキップ
+		if (N_ID == P_ID) continue;	// Skip if self is the calculation target
 
 		float3 N_position = _ParticlesBufferRead[N_ID].position;
-
+		// N=j
+		// P=i
 		float3 diff = N_position - P_position;	// Particle distance
 		float r_sq = dot(diff, diff);			// Particle distance squared
 
@@ -145,14 +198,14 @@ void DensityCS(uint3 DTid : SV_DispatchThreadID) {
 
 
 //--------------------------------------------------------------------------------------
-// Pressure calculation
+// Pressure calculation ///  equation Tait
 //--------------------------------------------------------------------------------------
 [numthreads(THREAD_SIZE_X, 1, 1)]
 void PressureCS(uint3 DTid : SV_DispatchThreadID) {
 	uint P_ID = DTid.x;	// Particle ID currently being processed
 
-	float  P_density = _ParticlesDensityBufferRead[P_ID].density;	// 先程算出した密度
-	float  P_pressure = CalculatePressure(P_density);	// 圧力の計算
+	float  P_density = _ParticlesDensityBufferRead[P_ID].density;	// Density calculated earlier
+	float  P_pressure = CalculatePressure(P_density);	// Pressure calculation
 
 	// Update pressure buffer
 	_ParticlesPressureBufferWrite[P_ID].pressure = P_pressure;
@@ -172,10 +225,14 @@ void ForceCS(uint3 DTid : SV_DispatchThreadID) {
 	float  P_pressure = _ParticlesPressureBufferRead[P_ID].pressure;	// The pressure calculated earlier
 
 	const float h_sq = _Smoothlen * _Smoothlen;
-
+	//N=j
+	//P=i
 	// Neighborhood search(O(n^2))
 	float3 press = float3(0, 0, 0);
 	float3 visco = float3(0, 0, 0);
+	// float3 surfaceTension = float3(0, 0, 0);
+	ColorField temp;
+	ColorField color;
 	for (uint N_ID = 0; N_ID < (uint)_NumParticles; N_ID++) {
 		if (N_ID == P_ID) continue;	// Skip if targeting yourself
 
@@ -196,11 +253,21 @@ void ForceCS(uint3 DTid : SV_DispatchThreadID) {
 
 			// sticky item
 			visco += CalculateLapVelocity(r, P_velocity, N_velocity, N_density);
+
+			temp=CalculateSurfaceTension(r_sq,N_density,diff);
+			color.colorGradient+=temp.colorGradient;
+			color.colorLaplacian+=temp.colorLaplacian;
+
+
 		}
 	}
-
+	float3 colorGradient=color.colorGradient;
+	float madntiude=sqrt(colorGradient.x*colorGradient.x + colorGradient.y*colorGradient.y + colorGradient.z*colorGradient.z);
+	float3 tension=-_tensionCoefficient*color.colorLaplacian*color.colorGradient/madntiude;
+	tension=float3(0,0,0);
+	
 	// Integration
-	float3 force = press + _Viscosity * visco;
+	float3 force = press + _Viscosity * visco + tension;
 
 	// Acceleration buffer update
 	_ParticlesForceBufferWrite[P_ID].acceleration = force / P_density;
@@ -223,25 +290,27 @@ void IntegrateCS(uint3 DTid : SV_DispatchThreadID) {
 
 	// Wall boundary (penalty method)
 	float dist;
+	//x in 0
 	dist = dot(float4(position, 1), float4(1, 0, 0, 0));
 	acceleration += min(dist, 0) * -_WallStiffness * float3(1, 0, 0);
-
+	//y in 0
 	dist = dot(float4(position, 1), float4(0, 1, 0, 0));
 	acceleration += min(dist, 0) * -_WallStiffness * float3(0, 1, 0);
-
+	//z in 0
 	dist = dot(float4(position, 1), float4(0, 0, 1, 0));
 	acceleration += min(dist, 0) * -_WallStiffness * float3(0, 0, 1);
-
+	//x in max
 	dist = dot(float4(position, 1), float4(-1, 0, 0, _Range.x));
 	acceleration += min(dist, 0) * -_WallStiffness * float3(-1, 0, 0);
-
+	//y in max
 	dist = dot(float4(position, 1), float4(0, -1, 0, _Range.y));
 	acceleration += min(dist, 0) * -_WallStiffness * float3(0, -1, 0);
-
+	//z in max
 	dist = dot(float4(position, 1), float4(0, 0, -1, _Range.z));
 	acceleration += min(dist, 0) * -_WallStiffness * float3(0, 0, -1);
 
 	// Gravity addition
+	//TODO:must _Gravity*_mass
 	acceleration += _Gravity;
 
 	// Update the next particle position with the forward Euler method
@@ -252,3 +321,5 @@ void IntegrateCS(uint3 DTid : SV_DispatchThreadID) {
 	_ParticlesBufferWrite[P_ID].position = position;
 	_ParticlesBufferWrite[P_ID].velocity = velocity;
 }
+
+

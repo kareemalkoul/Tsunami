@@ -294,7 +294,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 529182405}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 2.49, z: -5.039}
+  m_LocalPosition: {x: 2.67, y: 2.49, z: -13.22}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 0}
@@ -307,7 +307,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 529182405}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: e1c4cdcf87088c94c9e65b3f501ddd8d, type: 3}
   m_Name: 
@@ -328,12 +328,20 @@ PrefabInstance:
       value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 361318686889559026, guid: 9571e6baab469384e9372a4150288837, type: 3}
+      propertyPath: range.x
+      value: 6
+      objectReference: {fileID: 0}
+    - target: {fileID: 361318686889559026, guid: 9571e6baab469384e9372a4150288837, type: 3}
+      propertyPath: range.z
+      value: 6
+      objectReference: {fileID: 0}
+    - target: {fileID: 361318686889559026, guid: 9571e6baab469384e9372a4150288837, type: 3}
       propertyPath: iterations
       value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 361318686889559026, guid: 9571e6baab469384e9372a4150288837, type: 3}
       propertyPath: particleNum
-      value: 4096
+      value: 8192
       objectReference: {fileID: 0}
     - target: {fileID: 361318686889559027, guid: 9571e6baab469384e9372a4150288837, type: 3}
       propertyPath: m_RootOrder
@@ -440,5 +448,9 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 114520192571769522, guid: c3b2f6c965eb27a419edb7bbd9ba3c87, type: 3}
+      propertyPath: fluidCS
+      value: 
+      objectReference: {fileID: 7200000, guid: ca9212653282c144b8cc8de0dc46c4d9, type: 3}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: c3b2f6c965eb27a419edb7bbd9ba3c87, type: 3}
