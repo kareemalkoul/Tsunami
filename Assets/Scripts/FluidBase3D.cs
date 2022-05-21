@@ -38,7 +38,7 @@ namespace Kodai.Fluid.SPH
         private float lapViscosityCoef;                                                     // Viscosity coefficient of Laplacian kernel  
         private float lapTensionCoef;                                                       // Tension coefficient of Laplacian kernel
         private float gradTensionCoef;                                                      // Tension coefficient of grad kernel
-
+        private bool oddStep;
 
         #region DirectCompute
         [SerializeField] ComputeShader fluidCS;
@@ -48,6 +48,8 @@ namespace Kodai.Fluid.SPH
         private ComputeBuffer particlesPressureBuffer;                                      // A buffer that holds particle pressure dataA buffer that holds particle pressure data
         private ComputeBuffer particleDensitiesBuffer;                                      // Buffer that holds particle density data
         private ComputeBuffer particleForcesBuffer;                                         // Buffer that holds particle acceleration data
+        private ComputeBuffer particleForcesOldBufferRead;                                       // Buffer that holds particle old acceleration data
+        private ComputeBuffer particleForcesOldBufferWrite;                                       // Buffer that holds particle old acceleration data
         private ComputeBuffer debugBuffer;                                                  // Debug buffer
 
         #endregion
@@ -105,7 +107,7 @@ namespace Kodai.Fluid.SPH
             lapViscosityCoef = particleMass * 45f / (Mathf.PI * Mathf.Pow(smoothlen, 6));               // Viscosity for 3D
             gradTensionCoef = particleMass * -24 / (32 * Mathf.PI * Mathf.Pow(smoothlen, 9));           // Poly6 for 3D
             lapTensionCoef = particleMass * -945 / (32 * Mathf.PI * Mathf.Pow(smoothlen, 9));            // Poly6 for 3D
-
+            oddStep = !oddStep;
             // Transfer of shader constants
             fluidCS.SetInt("_NumParticles", numParticles);
             fluidCS.SetFloat("_TimeStep", timeStep);
@@ -123,6 +125,7 @@ namespace Kodai.Fluid.SPH
             fluidCS.SetFloat("_WallStiffness", wallStiffness);
             fluidCS.SetVector("_Range", range);
             fluidCS.SetVector("_Gravity", gravity);
+            fluidCS.SetBool("_oddStep",oddStep);
 
             AdditionalCSParams(fluidCS);
 
@@ -141,6 +144,9 @@ namespace Kodai.Fluid.SPH
             DeleteBuffer(particlesPressureBuffer);
             DeleteBuffer(particleDensitiesBuffer);
             DeleteBuffer(particleForcesBuffer);
+            DeleteBuffer(particleForcesOldBufferRead);
+            DeleteBuffer(particleForcesOldBufferWrite);
+
         }
 
         #endregion Mono
@@ -183,6 +189,10 @@ namespace Kodai.Fluid.SPH
             fluidCS.SetBuffer(kernelID, "_ParticlesBufferRead", particlesBufferRead);
             fluidCS.SetBuffer(kernelID, "_ParticlesForceBufferRead", particleForcesBuffer);
             fluidCS.SetBuffer(kernelID, "_ParticlesBufferWrite", particlesBufferWrite);
+
+            fluidCS.SetBuffer(kernelID, "_ParticlesForceOldBufferWrite", particleForcesOldBufferWrite);
+            fluidCS.SetBuffer(kernelID, "_ParticlesForceOldBufferRead", particleForcesOldBufferRead);
+
             fluidCS.Dispatch(kernelID, threadGroupsX, 1, 1);
 
             var result = new float[threadGroupsX];
@@ -193,6 +203,7 @@ namespace Kodai.Fluid.SPH
             }
 
             SwapComputeBuffer(ref particlesBufferRead, ref particlesBufferWrite);   // Swapping buffers
+            SwapComputeBuffer(ref particleForcesOldBufferWrite, ref particleForcesOldBufferRead);
         }
 
         /// <summary>
@@ -223,6 +234,9 @@ namespace Kodai.Fluid.SPH
             particleForcesBuffer = new ComputeBuffer(numParticles, Marshal.SizeOf(typeof(FluidParticleForces3D)));
             particleDensitiesBuffer = new ComputeBuffer(numParticles, Marshal.SizeOf(typeof(FluidParticleDensity)));
             debugBuffer = new ComputeBuffer(numParticles, sizeof(float));
+            particleForcesOldBufferRead = new ComputeBuffer(numParticles, Marshal.SizeOf(typeof(FluidParticleForces3D)));
+            particleForcesOldBufferWrite = new ComputeBuffer(numParticles, Marshal.SizeOf(typeof(FluidParticleForces3D)));
+
 
         }
 
