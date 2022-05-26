@@ -1,4 +1,9 @@
-﻿#pragma kernel DensityCS
+﻿#include "structures.cginc"
+#include "buffers.cginc"
+#include "constants.cginc"
+#include "collison_detection/wallBoundray.cginc"
+
+#pragma kernel DensityCS
 #pragma kernel PressureCS
 #pragma kernel ForceCS
 #pragma kernel IntegrateCS
@@ -6,159 +11,17 @@
 // Keep the number of threads one-dimensional for simplicity
 #define THREAD_SIZE_X 1024
 
-// ▼ Structured buffer definition ---------------------
-struct Particle {
-	float3 position;
-	float3 velocity;
-};
-
-struct ParticlePressure {
-	float pressure;
-};
-
-struct ParticleForces {
-	float3 acceleration;
-};
-
-struct ParticleDensity {
-	float density;
-};
-
-struct ColorField {
-	float colorField;
-	float colorLaplacian;
-	float3 colorGradient;
-};
-
-RWStructuredBuffer<float>			_DebugBuffer;
-
-// Buffer to hold particle position and velocity
-StructuredBuffer  <Particle>        _ParticlesBufferRead;
-RWStructuredBuffer<Particle>        _ParticlesBufferWrite;
-
-// Buffer to hold particle density
-StructuredBuffer  <ParticleDensity> _ParticlesDensityBufferRead;
-RWStructuredBuffer<ParticleDensity> _ParticlesDensityBufferWrite;
-
-// Buffer to hold particle pressure
-StructuredBuffer<ParticlePressure>	_ParticlesPressureBufferRead;
-RWStructuredBuffer<ParticlePressure> _ParticlesPressureBufferWrite;
-
-// Buffer that holds particle acceleration (force)
-StructuredBuffer  <ParticleForces>  _ParticlesForceBufferRead;
-RWStructuredBuffer<ParticleForces>  _ParticlesForceBufferWrite;
-// ▲ Structured buffer definition ---------------------
-
-// ▼ Definition of shader constants -----------------------
-cbuffer CB {
-	int   _NumParticles;		// Number of particles
-	float _TimeStep;			// Time step width (dt)
-	float _Smoothlen;			// Particle radius
-	float _PressureStiffness;	// Becker's coefficient
-	float _RestDensity;			// resting density
-	float _DensityCoef;			// Coefficient when calculating density
-	float _GradPressureCoef;	// Coefficient when calculating pressure
-	float _LapViscosityCoef;	// Coefficient when calculating viscosity
-	float _GradTensionCoef;		// Coefficient when calculating Tension
-	float _LapTensionCoef;		// Coefficient when calculating Tension
-	float _WallStiffness;		// The pushing force of the penalty method
-	float _Viscosity;			// Viscosity coefficient
-	float3 _Gravity;			// gravity
-	float3 _Range;				// Simulation space
-	float _tensionThreshold;	//Tension Threshold
-	float _tensionCoefficient;	//Tension Coefficient
-
-	float3 _MousePos;			// Mouse position
-	float _MouseRadius;			// Radius of mouse interaction
-	bool _MouseDown;			// Is the mouse pressed
-};
-// ▲ Definition of shader constants -----------------------
-
-
-
 // ▼ ★ Main body from here --------------------------------------
 
-/// Implementation of Poly6 Kernel 
-/// W_poly6(r, h) = DensityCoef * (h^2 - r^2)^3
-/// -> DensityCoef = ParticleMass * 4 / (PI * Smoothlen^8)
-inline float CalculateDensity(float r_sq) {
-	const float h_sq = _Smoothlen * _Smoothlen;
-	return _DensityCoef * (h_sq - r_sq) * (h_sq - r_sq) * (h_sq - r_sq);
-}
+#include "kernels/Densitykernel.cginc"
 
-/// Becker2007 Implementation of uncompressed conditions:
-/// Pressure = B * ((rho / rho_0)^gamma  - 1)
-/// The pressure constant B should be calculated accurately, but it is not suitable for real time, so set it to an appropriate value.
-inline float CalculatePressure(float density) {
-	return _PressureStiffness * max(pow(abs(density / _RestDensity), 7) - 1, 0);
-}
+#include "kernels/pressurekernel.cginc"
 
-/// Implementation of Spiky kernel
-/// mass * ((pressure_i + pressure_j)/(2 * density_j)) * Grad(W_Spiky)
-/// Grad(W_Spiky) = -30 / (pi * h^5) * (h - r)^2
-inline float3 CalculateGradPressure(float r, float P_pressure, float N_pressure, float N_density, float3 diff) {
-	const float h = _Smoothlen;
-	float avg_pressure = 0.5f * (N_pressure + P_pressure);
-	// _GradPressureCoef = particleMass * -45.0f / (Mathf.PI * Mathf.Pow(smoothlen, 6))
-	// N=j
-	// P=i curr particle
-	// float3 Grad=W_Spiky=_GradPressureCoef*(h - r) * (h - r) * diff / r;
-	return _GradPressureCoef * avg_pressure / N_density * (h - r) * (h - r) / r * (diff);
-}
+#include "kernels/gradPressurekernel.cginc"
 
-/// Viscosity kernel implementation:
-/// mass * (u_j - u_i) / density_j * Laplacian(W_viscosity)
-/// Laplacian(W_viscosity) = 20 / (3 * pi * h^5) * (h - r)
-inline float3 CalculateLapVelocity(float r, float3 P_velocity, float3 N_velocity, float N_density) {
-	const float h = _Smoothlen;
-	// _LapViscosityCoef= particleMass * 45f / (Mathf.PI * Mathf.Pow(smoothlen, 6))
-	// N=j
-	// P=i curr particle
-	float3 vel_diff = (N_velocity - P_velocity);
-	return _LapViscosityCoef / N_density * (h - r) * vel_diff;
-}
+#include "kernels/viscositykernel.cginc"
 
-inline ColorField CalculateSurfaceTension(float r_sq , float N_density, float3 diff)
-{
-	//diff =r=ri-rj
-	//N=j is neighbors
-	//p=i
-	ColorField color;
-	float colorField = 0.0f;
-	float3 colorGradient = float3(0,0,0);
-	float colorLaplacian = 0.0f;
-	float tensionCoefficient = 0.0728f;
-	const float h = _Smoothlen;
-	const float h_sq = _Smoothlen * _Smoothlen;
-	// const float r_sq = r * r;
-
-	// colorField += j.mass / j.density * Kernel.Poly6(i.position - j.position, h);
-	colorGradient=_GradTensionCoef*diff * (h_sq - r_sq) *(h_sq - r_sq) /N_density;
-  
-	// colorGradient += j.mass / j.density * Kernel.Poly6Grad(i.position - j.position, h);
-
-
-	colorLaplacian=_LapTensionCoef * (h_sq - r_sq) *(3 *(h_sq)-7*r_sq)/N_density;
-
-	// colorLaplacian += j.mass / j.density * Kernel.Poly6Lap(i.position - j.position, h);
-
-
-
-	float sqrMagnitude=colorGradient.x*colorGradient.x+colorGradient.y*colorGradient.y+colorGradient.z*colorGradient.z;
-	if (sqrMagnitude < _tensionThreshold * _tensionThreshold)
-	{
-		// This particle isn't close to the surface
-		return color;
-	}
-
-	color.colorField=colorField;
-	color.colorLaplacian=colorLaplacian;
-	color.colorGradient=colorGradient;
-	// float tension=-tensionCoefficient*colorLaplacian*colorGradient/colorField
-
-	return color;
-}
-
+#include "kernels/surfaceTensionkernel.cginc"
 
 
 // ▼ Kernel function
@@ -294,26 +157,8 @@ void IntegrateCS(uint3 DTid : SV_DispatchThreadID) {
 
 	// Here to write collision detection -----
 
-	// Wall boundary (penalty method)
-	float dist;
-	//x in 0
-	dist = dot(float4(position, 1), float4(1, 0, 0, 0));
-	acceleration += min(dist, 0) * -_WallStiffness * float3(1, 0, 0);
-	//y in 0
-	dist = dot(float4(position, 1), float4(0, 1, 0, 0));
-	acceleration += min(dist, 0) * -_WallStiffness * float3(0, 1, 0);
-	//z in 0
-	dist = dot(float4(position, 1), float4(0, 0, 1, 0));
-	acceleration += min(dist, 0) * -_WallStiffness * float3(0, 0, 1);
-	//x in max
-	dist = dot(float4(position, 1), float4(-1, 0, 0, _Range.x));
-	acceleration += min(dist, 0) * -_WallStiffness * float3(-1, 0, 0);
-	//y in max
-	dist = dot(float4(position, 1), float4(0, -1, 0, _Range.y));
-	acceleration += min(dist, 0) * -_WallStiffness * float3(0, -1, 0);
-	//z in max
-	dist = dot(float4(position, 1), float4(0, 0, -1, _Range.z));
-	acceleration += min(dist, 0) * -_WallStiffness * float3(0, 0, -1);
+	// Wall boundary
+	acceleration=wallboundray(acceleration,position);
 
 	// Gravity addition
 	//TODO:must _Gravity*_mass

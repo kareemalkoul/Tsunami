@@ -655,7 +655,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 361318686889559020, guid: 9571e6baab469384e9372a4150288837, type: 3}
       propertyPath: m_IsActive
-      value: 1
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 361318686889559026, guid: 9571e6baab469384e9372a4150288837, type: 3}
       propertyPath: fluidCS
