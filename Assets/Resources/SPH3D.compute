@@ -1,6 +1,7 @@
-﻿#include "structures.cginc"
-#include "buffers.cginc"
-#include "constants.cginc"
+﻿#include "utlis/structures.cginc"
+#include "utlis/buffers.cginc"
+#include "utlis/constants.cginc"
+
 #include "collison_detection/wallBoundray.cginc"
 
 #pragma kernel DensityCS
@@ -14,13 +15,9 @@
 // ▼ ★ Main body from here --------------------------------------
 
 #include "kernels/Densitykernel.cginc"
-
 #include "kernels/pressurekernel.cginc"
-
 #include "kernels/gradPressurekernel.cginc"
-
 #include "kernels/viscositykernel.cginc"
-
 #include "kernels/surfaceTensionkernel.cginc"
 
 
