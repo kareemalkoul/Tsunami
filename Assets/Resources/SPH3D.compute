@@ -1,6 +1,6 @@
-﻿#include "utlis/structures.cginc"
-#include "utlis/buffers.cginc"
-#include "utlis/constants.cginc"
+﻿#include "utils/structures.cginc"
+#include "utils/buffers.cginc"
+#include "utils/constants.cginc"
 
 #include "collison_detection/wallBoundray.cginc"
 
