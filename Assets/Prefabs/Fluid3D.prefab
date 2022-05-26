@@ -56,6 +56,9 @@ MonoBehaviour:
   gravity: {x: 0, y: -10, z: 0}
   range: {x: 5, y: 9, z: 5}
   simulate: 1
+  tensionThreshold: 0.7
+  tensionCoefficient: 0.0728
+  fluidCS: {fileID: 7200000, guid: 458fbf94ee3b84a4abc12a2763464c81, type: 3}
   ballRadius: 5
   MouseInteractionRadius: 1.5
 --- !u!114 &361318686889559021

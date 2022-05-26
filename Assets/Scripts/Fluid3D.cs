@@ -15,6 +15,12 @@ namespace Kareem.Fluid.SPH
         [SerializeField] private float ballRadius = 0.1f;           // Circular radius at particle position initialization
         [SerializeField] private float MouseInteractionRadius = 1f; // Wide range of mouse interactions
 
+
+        [SerializeField] public float separationFactor = 1.4f;
+        private float particleScale;
+
+        [SerializeField] private float volume = 1;
+
         private bool isMouseDown;
         private Vector3 screenToWorldPointPos;
 
@@ -24,58 +30,70 @@ namespace Kareem.Fluid.SPH
         /// <param name="particles"></param>
         protected override void InitParticleData(ref FluidParticle3D[] particles)
         {
-            // float origin =
+            // initCubeMethod(ref particles);
+
+            initSphereMethod(ref particles);
+
+        }
+
+        void initSphereMethod(ref FluidParticle3D[] particles)
+        {
             for (int i = 0; i < NumParticles; i++)
             {
                 particles[i].Velocity = Vector3.zero;
                 particles[i].Position = range / 2f + Random.insideUnitSphere * ballRadius;  // Initialize particles into a sphere
             }
-            // float space = range.x * range.y * range.z;
-            // float nums = NumParticles / space;
+        }
 
-            // int sideCountX = (int)(range.x * nums);
-            // int sideCountY = (int)(range.y * nums);
-            // int sideCountZ = (int)(range.z * nums);
-            // int count = 0;
-            // Debug.Log(nums);
-            // Debug.Log(sideCountX);
-            // Debug.Log(sideCountY);
-            // Debug.Log(sideCountZ);
 
-            // for (int i = 0; i < sideCountX; i++)
-            // {
-            //     if (count >= NumParticles) break;
-            //     for (int j = 0; j < sideCountY; j++)
-            //     {
-            //         if (count >= NumParticles) break;
-            //         for (int k = 0; k < sideCountZ; k++)
-            //         {
-            //             if (count >= NumParticles)
-            //             {
-            //                 Debug.Log(NumParticles);
-            //                 Debug.Log(count);
-            //                 break;
-            //             }
+        void initCubeMethod(ref FluidParticle3D[] particles)
+        {
+            particleScale = 2 * ballRadius;
+            volume = Mathf.Pow(particleScale, 3) * NumParticles * separationFactor;
 
-            //             float x = i / ballRadius, y = j / ballRadius, z = k / ballRadius;
+            Debug.Log("volume; " + volume);
+            Debug.Log("count: " + NumParticles);
 
-            //             particles[count].Position = new Vector3(x, y, z);
-            //             // Vector3 pos = origin + Vector3.right * i * delta + Vector3.forward * j * delta + Vector3.up * k * delta;
-            //             // GameObject o = Instantiate(particlePrefab, pos, particlePrefab.transform.rotation, this.transform);
-            //             // o.name="Particle "+i+" "+j+" "+k;
-            //             // Particle p = o.GetComponent<Particle>();
-            //             // p.position = pos;
-            //             particles[count].Velocity = Vector3.zero;
-            //             Debug.Log(count + " " + particles[count].Position);
-            //             count++;
+            float sideLength = Mathf.Pow(volume, 1f / 3f);
+            int sideCount = (int)Mathf.Pow(NumParticles, 1f / 3f);
+            int extra = NumParticles - (int)Mathf.Pow(sideCount, 3);
 
-            //             // l.Add(p);
+            Debug.Log("sideLength: " + sideLength);
+            Debug.Log("sideCount: " + sideCount);
+            Debug.Log("extra: " + extra);
 
-            //         }
-            //     }
-            // }
-            // Debug.Log(count);
+            float delta = (float)sideLength /( (float)sideCount*150);
 
+            Debug.Log("delta: " + delta);
+
+
+            Vector3 origin = new Vector3(0, 0, 0);//new Vector3(-sideLength/2, 1.0f, -sideLength / 2);
+            int n = 0;
+            for (int i = 0; i < sideCount; i++)
+            {
+                for (int j = 0; j < sideCount; j++)
+                {
+                    for (int k = 0; k < sideCount; k++)
+                    {
+                        Vector3 pos = origin + Vector3.right * i * delta + Vector3.forward * j * delta + Vector3.up * k * delta;
+                        // GameObject o = Instantiate(particlePrefab, pos, particlePrefab.transform.rotation, this.transform);
+                        // Particle p = o.GetComponent<Particle>();
+                        if (n >= NumParticles)
+                            return;
+                        Debug.Log("particle " + n + " " + pos);
+                        particles[n].Position = pos;
+                        // particles[n].Position += Random.insideUnitSphere * 0.05f;
+                        particles[n].Velocity = Vector3.zero;
+                        n++;
+                    }
+                }
+            }
+            Debug.Log("n: " + n);
+        }
+
+        public float BallRadius
+        {
+            get { return ballRadius; }
         }
 
         /// <summary>

@@ -79,7 +79,6 @@ cbuffer CB {
 // ▼ ★ Main body from here --------------------------------------
 
 /// Implementation of Poly6 Kernel 
-/// http://www.slis.tsukuba.ac.jp/~fujisawa.makoto.fu/cgi-bin/wiki/index.php?SPH%CB%A1%A4%CE%BD%C5%A4%DF%B4%D8%BF%F4
 /// W_poly6(r, h) = DensityCoef * (h^2 - r^2)^3
 /// -> DensityCoef = ParticleMass * 4 / (PI * Smoothlen^8)
 inline float CalculateDensity(float r_sq) {
@@ -287,28 +286,39 @@ void IntegrateCS(uint3 DTid : SV_DispatchThreadID) {
 	float3 acceleration = _ParticlesForceBufferRead[P_ID].acceleration;	// Calculated acceleration
 
 	// Here to write collision detection -----
+	float velocityDamping=0.8f;
+	if ( position.x < 0)
+	{
+		position.x =0;
+		velocity.x = -velocity.x * velocityDamping;
+	}
+	else if ( position.x > _Range.x)
+	{
+		position.x = _Range.x;
+		velocity.x = -velocity.x * velocityDamping;
+	}
 
-	// Wall boundary (penalty method)
-	float dist;
-	//x in 0
-	dist = dot(float4(position, 1), float4(1, 0, 0, 0));
-	acceleration += min(dist, 0) * -_WallStiffness * float3(1, 0, 0);
-	//y in 0
-	dist = dot(float4(position, 1), float4(0, 1, 0, 0));
-	acceleration += min(dist, 0) * -_WallStiffness * float3(0, 1, 0);
-	//z in 0
-	dist = dot(float4(position, 1), float4(0, 0, 1, 0));
-	acceleration += min(dist, 0) * -_WallStiffness * float3(0, 0, 1);
-	//x in max
-	dist = dot(float4(position, 1), float4(-1, 0, 0, _Range.x));
-	acceleration += min(dist, 0) * -_WallStiffness * float3(-1, 0, 0);
-	//y in max
-	dist = dot(float4(position, 1), float4(0, -1, 0, _Range.y));
-	acceleration += min(dist, 0) * -_WallStiffness * float3(0, -1, 0);
-	//z in max
-	dist = dot(float4(position, 1), float4(0, 0, -1, _Range.z));
-	acceleration += min(dist, 0) * -_WallStiffness * float3(0, 0, -1);
+	if ( position.y <0)
+	{
+		position.y = 0;
+		velocity.y = -velocity.y * velocityDamping;
+	}
+	else if ( position.y > _Range.y)
+	{
+		position.y = _Range.y;
+		velocity.y = -velocity.y * velocityDamping;
+	}
 
+	if ( position.z < 0)
+	{
+		position.z = 0;
+		velocity.z = -velocity.z * velocityDamping;
+	}
+	else if ( position.z >_Range.z)
+	{
+		position.z = _Range.z;
+		velocity.z = -velocity.z * velocityDamping;
+	}
 	// Gravity addition
 	//TODO:must _Gravity*_mass
 	acceleration += _Gravity;

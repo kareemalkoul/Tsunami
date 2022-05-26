@@ -94,7 +94,6 @@ cbuffer CB {
 // ▼ ★ Main body from here --------------------------------------
 
 /// Implementation of Poly6 Kernel 
-/// http://www.slis.tsukuba.ac.jp/~fujisawa.makoto.fu/cgi-bin/wiki/index.php?SPH%CB%A1%A4%CE%BD%C5%A4%DF%B4%D8%BF%F4
 /// W_poly6(r, h) = DensityCoef * (h^2 - r^2)^3
 /// -> DensityCoef = ParticleMass * 4 / (PI * Smoothlen^8)
 inline float CalculateDensity(float r_sq) {
