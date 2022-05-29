@@ -5,69 +5,67 @@ using UnityEngine;
 
 namespace Kareem.Fluid.SPH
 {
-
-    public enum NumParticleEnum
-    {
-        NUM_1K = 1024,
-        NUM_2K = 1024 * 2,
-        NUM_4K = 1024 * 4,
-        NUM_8K = 1024 * 8,
-        NUM_16K = 1024 * 16,
-        NUM_32K = 1024 * 32,
-        NUM_64K = 1024 * 64
-    };
-
-    
-    
-    struct FluidParticleDensity
-    {
-        public float Density;
-    };
-
-    struct FluidParticlePressure
-    {
-        float pressure;
-    };
-
-    struct FluidParticleForces
-    {
-        public Vector2 Acceleration;
-    };
-
     public abstract class FluidBase<T> : MonoBehaviour where T : struct
     {
+        [SerializeField]
+        protected NumParticleEnum particleNum = NumParticleEnum.NUM_8K;
 
-        [SerializeField] protected NumParticleEnum particleNum = NumParticleEnum.NUM_8K;    
-        [SerializeField] protected float smoothlen = 0.012f;                                
-        [SerializeField] private float pressureStiffness = 200.0f;                          
-        [SerializeField] protected float restDensity = 1000.0f;                             
-        [SerializeField] protected float particleMass = 0.0002f;                            
-        [SerializeField] protected float viscosity = 0.1f;                                  
-        [SerializeField] protected float maxAllowableTimestep = 0.005f;                     
-        [SerializeField] protected float wallStiffness = 3000.0f;                           
-        [SerializeField] protected int iterations = 4;                                      
-        [SerializeField] protected Vector2 gravity = new Vector2(0.0f, -0.5f);              
-        [SerializeField] protected Vector2 range = new Vector2(1, 1);                       
-        [SerializeField] protected bool simulate = true;                                    
-        [SerializeField] protected float tensionThreshold = 0.7f;
-        [SerializeField] protected float tensionCoefficient = 0.0728f;
+        [SerializeField]
+        protected float smoothlen = 0.012f;
 
-        private int numParticles;                                                           
-        private float timeStep;                                                             
-        private float densityCoef;                                                          
-        private float gradPressureCoef;                                                     
-        private float lapViscosityCoef;                                                     
-        private float lapTensionCoef;                                                       
-        private float gradTensionCoef;                                                      
+        [SerializeField]
+        private float pressureStiffness = 200.0f;
+
+        [SerializeField]
+        protected float restDensity = 1000.0f;
+
+        [SerializeField]
+        protected float particleMass = 0.0002f;
+
+        [SerializeField]
+        protected float viscosity = 0.1f;
+
+        [SerializeField]
+        protected float maxAllowableTimestep = 0.005f;
+
+        [SerializeField]
+        protected float wallStiffness = 3000.0f;
+
+        [SerializeField]
+        protected int iterations = 4;
+
+        [SerializeField]
+        protected Vector2 gravity = new Vector2(0.0f, -0.5f);
+
+        [SerializeField]
+        protected Vector2 range = new Vector2(1, 1);
+
+        [SerializeField]
+        protected bool simulate = true;
+
+        [SerializeField]
+        protected float tensionThreshold = 0.7f;
+
+        [SerializeField]
+        protected float tensionCoefficient = 0.0728f;
+
+        private int numParticles;
+        private float timeStep;
+        private float densityCoef;
+        private float gradPressureCoef;
+        private float lapViscosityCoef;
+        private float lapTensionCoef;
+        private float gradTensionCoef;
 
         #region DirectCompute
-        [SerializeField] protected ComputeShader fluidCS;
-        private static readonly int THREAD_SIZE_X = 1024;                                   
-        private ComputeBuffer particlesBufferRead;                                          
-        private ComputeBuffer particlesBufferWrite;                                         
-        private ComputeBuffer particlesPressureBuffer;                                      
-        private ComputeBuffer particleDensitiesBuffer;                                      
-        private ComputeBuffer particleForcesBuffer;                                         
+        [SerializeField]
+        protected ComputeShader fluidCS;
+        private static readonly int THREAD_SIZE_X = 1024;
+        private ComputeBuffer particlesBufferRead;
+        private ComputeBuffer particlesBufferWrite;
+        private ComputeBuffer particlesPressureBuffer;
+        private ComputeBuffer particleDensitiesBuffer;
+        private ComputeBuffer particleForcesBuffer;
         #endregion
 
         #region Accessor
@@ -86,20 +84,17 @@ namespace Kareem.Fluid.SPH
         protected virtual void Awake()
         {
             numParticles = (int)particleNum;
-
-
         }
 
         protected virtual void Start()
         {
-            if (fluidCS==null)
-              fluidCS = (ComputeShader)Resources.Load("SPH2D");
+            if (fluidCS == null)
+                fluidCS = (ComputeShader)Resources.Load("SPH2D");
             InitBuffers();
         }
 
         private void Update()
         {
-
             if (!simulate)
             {
                 return;
@@ -107,14 +102,12 @@ namespace Kareem.Fluid.SPH
 
             timeStep = Mathf.Min(maxAllowableTimestep, Time.deltaTime);
 
-            
             densityCoef = particleMass * 4f / (Mathf.PI * Mathf.Pow(smoothlen, 8));
             gradPressureCoef = particleMass * -30.0f / (Mathf.PI * Mathf.Pow(smoothlen, 5));
             lapViscosityCoef = particleMass * 20f / (3 * Mathf.PI * Mathf.Pow(smoothlen, 5));
-            gradTensionCoef = particleMass * -24 / (Mathf.PI * Mathf.Pow(smoothlen, 8));           
+            gradTensionCoef = particleMass * -24 / (Mathf.PI * Mathf.Pow(smoothlen, 8));
             lapTensionCoef = particleMass * -24 / (Mathf.PI * Mathf.Pow(smoothlen, 8));
 
-            
             fluidCS.SetInt("_NumParticles", numParticles);
             fluidCS.SetFloat("_TimeStep", timeStep);
             fluidCS.SetFloat("_Smoothlen", smoothlen);
@@ -134,7 +127,6 @@ namespace Kareem.Fluid.SPH
 
             AdditionalCSParams(fluidCS);
 
-            
             for (int i = 0; i < iterations; i++)
             {
                 RunFluidSolver();
@@ -151,28 +143,24 @@ namespace Kareem.Fluid.SPH
         }
         #endregion Mono
 
-        
-        
-        
+
+
+
         private void RunFluidSolver()
         {
-
             int kernelID = -1;
             int threadGroupsX = numParticles / THREAD_SIZE_X;
 
-            
             kernelID = fluidCS.FindKernel("DensityCS");
             fluidCS.SetBuffer(kernelID, "_ParticlesBufferRead", particlesBufferRead);
             fluidCS.SetBuffer(kernelID, "_ParticlesDensityBufferWrite", particleDensitiesBuffer);
             fluidCS.Dispatch(kernelID, threadGroupsX, 1, 1);
 
-            
             kernelID = fluidCS.FindKernel("PressureCS");
             fluidCS.SetBuffer(kernelID, "_ParticlesDensityBufferRead", particleDensitiesBuffer);
             fluidCS.SetBuffer(kernelID, "_ParticlesPressureBufferWrite", particlesPressureBuffer);
             fluidCS.Dispatch(kernelID, threadGroupsX, 1, 1);
 
-            
             kernelID = fluidCS.FindKernel("ForceCS");
             fluidCS.SetBuffer(kernelID, "_ParticlesBufferRead", particlesBufferRead);
             fluidCS.SetBuffer(kernelID, "_ParticlesDensityBufferRead", particleDensitiesBuffer);
@@ -180,31 +168,19 @@ namespace Kareem.Fluid.SPH
             fluidCS.SetBuffer(kernelID, "_ParticlesForceBufferWrite", particleForcesBuffer);
             fluidCS.Dispatch(kernelID, threadGroupsX, 1, 1);
 
-            
             kernelID = fluidCS.FindKernel("IntegrateCS");
             fluidCS.SetBuffer(kernelID, "_ParticlesBufferRead", particlesBufferRead);
             fluidCS.SetBuffer(kernelID, "_ParticlesForceBufferRead", particleForcesBuffer);
             fluidCS.SetBuffer(kernelID, "_ParticlesBufferWrite", particlesBufferWrite);
             fluidCS.Dispatch(kernelID, threadGroupsX, 1, 1);
 
-            SwapComputeBuffer(ref particlesBufferRead, ref particlesBufferWrite);   
+            SwapComputeBuffer(ref particlesBufferRead, ref particlesBufferWrite);
         }
 
-        
-        
-        
-        
         protected virtual void AdditionalCSParams(ComputeShader shader) { }
 
-        
-        
-        
-        
         protected abstract void InitParticleData(ref T[] particles);
 
-        
-        
-        
         private void InitBuffers()
         {
             particlesBufferRead = new ComputeBuffer(numParticles, Marshal.SizeOf(typeof(T)));
@@ -214,14 +190,20 @@ namespace Kareem.Fluid.SPH
             particles = null;
 
             particlesBufferWrite = new ComputeBuffer(numParticles, Marshal.SizeOf(typeof(T)));
-            particlesPressureBuffer = new ComputeBuffer(numParticles, Marshal.SizeOf(typeof(FluidParticlePressure)));
-            particleForcesBuffer = new ComputeBuffer(numParticles, Marshal.SizeOf(typeof(FluidParticleForces)));
-            particleDensitiesBuffer = new ComputeBuffer(numParticles, Marshal.SizeOf(typeof(FluidParticleDensity)));
+            particlesPressureBuffer = new ComputeBuffer(
+                numParticles,
+                Marshal.SizeOf(typeof(FluidParticlePressure))
+            );
+            particleForcesBuffer = new ComputeBuffer(
+                numParticles,
+                Marshal.SizeOf(typeof(FluidParticleForces))
+            );
+            particleDensitiesBuffer = new ComputeBuffer(
+                numParticles,
+                Marshal.SizeOf(typeof(FluidParticleDensity))
+            );
         }
 
-        
-        
-        
         private void SwapComputeBuffer(ref ComputeBuffer ping, ref ComputeBuffer pong)
         {
             ComputeBuffer temp = ping;
@@ -229,10 +211,6 @@ namespace Kareem.Fluid.SPH
             pong = temp;
         }
 
-        
-        
-        
-        
         private void DeleteBuffer(ComputeBuffer buffer)
         {
             if (buffer != null)

@@ -2,7 +2,6 @@ using UnityEngine;
 
 namespace Kareem.Fluid.SPH
 {
-
     public static class Kernel
     {
         private static float POLYCONST = 315 / (64 * Mathf.PI);
@@ -11,12 +10,12 @@ namespace Kareem.Fluid.SPH
 
         public static float Poly6(Vector3 distance, float h)
         {
-
             if (distance.magnitude > h || distance.magnitude < 0)
                 return 0;
 
-            return POLYCONST * Mathf.Pow(h, -9) * Mathf.Pow(Mathf.Pow(h, 2) - Mathf.Pow(distance.magnitude, 2), 3);
-
+            return POLYCONST
+                * Mathf.Pow(h, -9)
+                * Mathf.Pow(Mathf.Pow(h, 2) - Mathf.Pow(distance.magnitude, 2), 3);
         }
 
         public static Vector3 Poly6Grad(Vector3 distance, float h)
@@ -24,8 +23,10 @@ namespace Kareem.Fluid.SPH
             if (distance.magnitude > h || distance.magnitude < 0)
                 return Vector3.zero;
 
-            return POLYGRADCONST * Mathf.Pow(h, -9) * distance * Mathf.Pow(Mathf.Pow(h, 2)
-            - Mathf.Pow(distance.magnitude, 2), 2);
+            return POLYGRADCONST
+                * Mathf.Pow(h, -9)
+                * distance
+                * Mathf.Pow(Mathf.Pow(h, 2) - Mathf.Pow(distance.magnitude, 2), 2);
         }
 
         public static float Poly6Lap(Vector3 distance, float h)
@@ -33,9 +34,12 @@ namespace Kareem.Fluid.SPH
             if (distance.magnitude > h || distance.magnitude < 0)
                 return 0;
 
-            return POLYLAPCONST * (Mathf.Pow(h, -9) * (Mathf.Pow(h, 2)
-            - Mathf.Pow(distance.magnitude, 2)) * (3 * Mathf.Pow(h, 2)
-            - 7 * Mathf.Pow(distance.magnitude, 2)));
+            return POLYLAPCONST
+                * (
+                    Mathf.Pow(h, -9)
+                    * (Mathf.Pow(h, 2) - Mathf.Pow(distance.magnitude, 2))
+                    * (3 * Mathf.Pow(h, 2) - 7 * Mathf.Pow(distance.magnitude, 2))
+                );
         }
 
         public static Vector3 SpikyGrad(Vector3 distance, float h)
@@ -47,7 +51,10 @@ namespace Kareem.Fluid.SPH
                 {
                     return -45 / (Mathf.PI * Mathf.Pow(h, 6)) * distance.normalized;
                 }
-                return -45 / (Mathf.PI * Mathf.Pow(h, 6)) * Mathf.Pow(h - distance.magnitude, 2) * distance.normalized;
+                return -45
+                    / (Mathf.PI * Mathf.Pow(h, 6))
+                    * Mathf.Pow(h - distance.magnitude, 2)
+                    * distance.normalized;
             }
             else
             {

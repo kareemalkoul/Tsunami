@@ -1,21 +1,22 @@
 ﻿using UnityEngine;
 using System.Collections;
 
-namespace Kareem.Fluid.SPH {
-
+namespace Kareem.Fluid.SPH
+{
     [RequireComponent(typeof(Fluid2D))]
-    public class FluidRenderer : MonoBehaviour {
-
+    public class FluidRenderer : MonoBehaviour
+    {
         public Fluid2D solver;
         public Material RenderParticleMat;
         public Color WaterColor;
 
-        void OnRenderObject() {
+        void OnRenderObject()
+        {
             DrawParticle();
         }
 
-        void DrawParticle() {
-
+        void DrawParticle()
+        {
             RenderParticleMat.SetPass(0);
             RenderParticleMat.SetColor("_WaterColor", WaterColor);
             RenderParticleMat.SetBuffer("_ParticlesBuffer", solver.ParticlesBufferRead);
