@@ -12,20 +12,35 @@ namespace Kareem.Fluid.SPH
     public class Fluid3D : FluidBase3D<FluidParticle3D>
     {
         [SerializeField]
-        private float ballRadius = 0.1f; // Circular radius at particle position initialization
-
-        [SerializeField]
         private float MouseInteractionRadius = 1f; // Wide range of mouse interactions
 
         [SerializeField]
-        public float separationFactor = 1.4f;
-        private float particleScale;
+        private bool createGameObject = false;
 
         [SerializeField]
-        private float volume = 1;
+        public InitParticleWay initParticleWay = InitParticleWay.SPHERE;
 
         private bool isMouseDown;
         private Vector3 screenToWorldPointPos;
+
+        ///
+        ///Hide fields
+        [HideInInspector]
+        private float ballRadius = 0.1f; // Circular radius at particle position initialization
+
+        [HideInInspector]
+        public float separationFactor = 1.4f;
+
+        [HideInInspector]
+        private float volume = 1;
+
+        [HideInInspector]
+        private float particleRadius = 0.15f; // Radius for a particle
+
+        ///finish Hide Fields
+        ///
+
+
 
         /// <summary>
         /// Particle initial position setting
@@ -33,9 +48,32 @@ namespace Kareem.Fluid.SPH
         /// <param name="particles"></param>
         protected override void InitParticleData(ref FluidParticle3D[] particles)
         {
-            // initCubeMethod(ref particles);
+            switch (initParticleWay)
+            {
 
-            initCubeMethod(ref particles);
+                case InitParticleWay.SPHERE:
+                    initSphereMethod(ref particles);
+                    break;
+                case InitParticleWay.CUBE:
+                    initCubeMethod(ref particles);
+                    break;
+            }
+
+
+
+            if (createGameObject)
+                CreateGameObjectForParticles(ref particles);
+        }
+
+        void CreateGameObjectForParticles(ref FluidParticle3D[] particles)
+        {
+            for (int i = 0; i < NumParticles; i++)
+            {
+                GameObject o = new GameObject();
+                o.name = "Particle " + i;
+                o.transform.position = particles[i].Position;
+                o.transform.parent = gameObject.transform;
+            }
         }
 
         void initSphereMethod(ref FluidParticle3D[] particles)
@@ -49,7 +87,7 @@ namespace Kareem.Fluid.SPH
 
         void initCubeMethod(ref FluidParticle3D[] particles)
         {
-            particleScale = 2 * ballRadius;
+            float particleScale = 2 * particleRadius;
             volume = Mathf.Pow(particleScale, 3) * NumParticles * separationFactor;
 
             // Debug.Log("volume; " + volume);
@@ -95,11 +133,6 @@ namespace Kareem.Fluid.SPH
             Debug.Log("n: " + n);
         }
 
-        public float BallRadius
-        {
-            get { return ballRadius; }
-        }
-
         /// <summary>
         /// Add to the constant buffer of ComputeShader
         /// </summary>
@@ -127,6 +160,29 @@ namespace Kareem.Fluid.SPH
             cs.SetVector("_MousePos", screenToWorldPointPos);
             cs.SetFloat("_MouseRadius", MouseInteractionRadius);
             cs.SetBool("_MouseDown", isMouseDown);
+        }
+
+        public float BallRadius
+        {
+            get { return ballRadius; }
+            set { ballRadius = value; }
+        }
+
+        public float SeparationFactor
+        {
+            get { return separationFactor; }
+            set { separationFactor = value; }
+        }
+        public float ParticleRadius
+        {
+            get { return particleRadius; }
+            set { particleRadius = value; }
+        }
+
+        public float Volume
+        {
+            get { return volume; }
+            set { volume = value; }
         }
     }
 }

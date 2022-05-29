@@ -10,4 +10,26 @@ namespace Kareem.Fluid.SPH
         NUM_32K = 1024 * 32,
         NUM_64K = 1024 * 64
     };
+
+    public enum InitParticleWay
+    {
+        SPHERE = 0,
+        CUBE = 1,
+    }
+
+    public static class InitParticleWayExtensions
+    {
+        public static string ToFriendlyString(this InitParticleWay me)
+        {
+            switch (me)
+            {
+                case InitParticleWay.SPHERE:
+                    return "SPHERE";
+                case InitParticleWay.CUBE:
+                    return "CUBE";
+                default:
+                    return "nan";
+            }
+        }
+    }
 }

@@ -206,6 +206,18 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 3940404416909209042, guid: 9571e6baab469384e9372a4150288837, type: 3}
+      propertyPath: initParticleWay
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 3940404416909209042, guid: 9571e6baab469384e9372a4150288837, type: 3}
+      propertyPath: createGameObject
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3940404416909209042, guid: 9571e6baab469384e9372a4150288837, type: 3}
+      propertyPath: separationFactor
+      value: 7.29
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 9571e6baab469384e9372a4150288837, type: 3}
 --- !u!1 &434051039
@@ -394,7 +406,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 529182405}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 572414f9b36cf0445808d7b6ea60285a, type: 3}
+  m_Script: {fileID: 11500000, guid: 09743e7507e9f3344b09351371ba96ee, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   doFocus: 0
@@ -402,9 +414,9 @@ MonoBehaviour:
   minFocusDistance: 5
   firstUndoKey: 306
   secondUndoKey: 122
-  moveSpeed: 0.2
-  rotationSpeed: 5
-  zoomSpeed: 5
+  moveSpeed: 1
+  rotationSpeed: 10
+  zoomSpeed: 10
   mouseY: Mouse Y
   mouseX: Mouse X
   zoomAxis: Mouse ScrollWheel
@@ -646,6 +658,51 @@ PrefabInstance:
       objectReference: {fileID: 7200000, guid: ca9212653282c144b8cc8de0dc46c4d9, type: 3}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: c3b2f6c965eb27a419edb7bbd9ba3c87, type: 3}
+--- !u!1 &1582207489
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1582207491}
+  - component: {fileID: 1582207490}
+  m_Layer: 0
+  m_Name: GameObject
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &1582207490
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1582207489}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 102f41bec29994740b9bc0378bd31e05, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  experience: 2147483647
+  particlePrefab: {fileID: 0}
+--- !u!4 &1582207491
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1582207489}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 3.307598, y: 2.3726625, z: 0.42247415}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_RootOrder: 7
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1001 &1660572721
 PrefabInstance:
   m_ObjectHideFlags: 0
