@@ -3,11 +3,9 @@ using System.Collections;
 
 namespace Kareem.Fluid.SPH
 {
-
     [RequireComponent(typeof(Fluid3D))]
     public class FluidRenderer3D : MonoBehaviour
     {
-
         public Fluid3D solver;
         public Material RenderParticleMat;
         public Color WaterColor;
@@ -40,7 +38,6 @@ namespace Kareem.Fluid.SPH
 
             if (IsBoundsDrawed)
                 DrawBounds();
-
         }
 
         void DrawByExtension(FluidParticle3D[] particles, float radius)
@@ -54,7 +51,6 @@ namespace Kareem.Fluid.SPH
 
         void DrawBounds()
         {
-
             Vector3 offset = Vector3.zero;
             Vector3 range = solver.Range;
 
@@ -72,9 +68,6 @@ namespace Kareem.Fluid.SPH
 
             Color colorBoundry = Color.blue;
 
-
-
-
             Debug.DrawLine(Start, Start + EndX, colorBoundry);
             Debug.DrawLine(Start, Start + EndY, colorBoundry);
             Debug.DrawLine(Start, Start + EndZ, colorBoundry);
@@ -91,8 +84,6 @@ namespace Kareem.Fluid.SPH
 
             Debug.DrawLine(Start + EndYZ, Start + EndY, colorBoundry);
             Debug.DrawLine(Start + EndYZ, Start + EndZ, colorBoundry);
-
-
         }
     }
 }

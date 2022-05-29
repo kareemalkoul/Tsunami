@@ -292,9 +292,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b17ef6f3947953d42b06fe392ae6066b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  solver: {fileID: 669206634}
-  RenderParticleMat: {fileID: 2100000, guid: 79b8e4e87d0027242b76475f51be3f57, type: 2}
-  WaterColor: {r: 0, g: 0.7058824, b: 1, a: 0}
 --- !u!114 &669206634
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -307,20 +304,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8843a37a9a30dea4888923c367e2ad68, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  particleNum: 8192
-  smoothlen: 0.5
-  pressureStiffness: 0.57
-  restDensity: 4
-  particleMass: 0.08
-  viscosity: 3
-  maxAllowableTimestep: 0.004166667
-  wallStiffness: 3000
-  iterations: 4
-  gravity: {x: 0, y: -10, z: 0}
-  range: {x: 5, y: 9, z: 5}
-  simulate: 1
-  ballRadius: 5
-  MouseInteractionRadius: 1.5
 --- !u!4 &669206635
 Transform:
   m_ObjectHideFlags: 0
@@ -344,7 +327,7 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: 1383463523752164, guid: c3b2f6c965eb27a419edb7bbd9ba3c87, type: 3}
       propertyPath: m_IsActive
-      value: 1
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 4564428974380106, guid: c3b2f6c965eb27a419edb7bbd9ba3c87, type: 3}
       propertyPath: m_RootOrder
@@ -572,9 +555,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b17ef6f3947953d42b06fe392ae6066b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  solver: {fileID: 2005032282}
-  RenderParticleMat: {fileID: 2100000, guid: 79b8e4e87d0027242b76475f51be3f57, type: 2}
-  WaterColor: {r: 0, g: 0.7058824, b: 1, a: 1}
 --- !u!114 &2005032282
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -587,20 +567,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8843a37a9a30dea4888923c367e2ad68, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  particleNum: 8192
-  smoothlen: 0.012
-  pressureStiffness: 200
-  restDensity: 1000
-  particleMass: 0.0002
-  viscosity: 0.1
-  maxAllowableTimestep: 0.005
-  wallStiffness: 3000
-  iterations: 4
-  gravity: {x: 0, y: -0.5, z: 0}
-  range: {x: 1, y: 1, z: 1}
-  simulate: 1
-  ballRadius: 0.1
-  MouseInteractionRadius: 1
 --- !u!4 &2005032283
 Transform:
   m_ObjectHideFlags: 0
@@ -628,7 +594,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 361318686889559020, guid: 9571e6baab469384e9372a4150288837, type: 3}
       propertyPath: m_IsActive
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 361318686889559021, guid: 9571e6baab469384e9372a4150288837, type: 3}
       propertyPath: WaterColor.b

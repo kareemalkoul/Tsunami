@@ -9,8 +9,8 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 361318686889559027}
-  - component: {fileID: 361318686889559026}
-  - component: {fileID: 361318686889559021}
+  - component: {fileID: 3940404416909209042}
+  - component: {fileID: 4507585079103403238}
   m_Layer: 0
   m_Name: Fluid3D
   m_TagString: Untagged
@@ -32,7 +32,7 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &361318686889559026
+--- !u!114 &3940404416909209042
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -41,7 +41,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 361318686889559020}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 8843a37a9a30dea4888923c367e2ad68, type: 3}
+  m_Script: {fileID: 11500000, guid: 11e40a4745301fb42be13df8e8ca4ad6, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   particleNum: 8192
@@ -50,18 +50,20 @@ MonoBehaviour:
   restDensity: 4
   particleMass: 0.08
   viscosity: 3
-  maxAllowableTimestep: 0.004166667
+  maxAllowableTimestep: 0.0004166667
   wallStiffness: 3000
   iterations: 4
   gravity: {x: 0, y: -10, z: 0}
-  range: {x: 5, y: 9, z: 5}
+  range: {x: 10, y: 9, z: 10}
   simulate: 1
   tensionThreshold: 0.7
   tensionCoefficient: 0.0728
   fluidCS: {fileID: 7200000, guid: 458fbf94ee3b84a4abc12a2763464c81, type: 3}
-  ballRadius: 5
+  ballRadius: 0.1
   MouseInteractionRadius: 1.5
---- !u!114 &361318686889559021
+  separationFactor: 1.4
+  volume: 1
+--- !u!114 &4507585079103403238
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -70,9 +72,11 @@ MonoBehaviour:
   m_GameObject: {fileID: 361318686889559020}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: b17ef6f3947953d42b06fe392ae6066b, type: 3}
+  m_Script: {fileID: 11500000, guid: d34b978e0ae4be741a66c7ee1c0b6b66, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  solver: {fileID: 361318686889559026}
+  solver: {fileID: 3940404416909209042}
   RenderParticleMat: {fileID: 2100000, guid: 79b8e4e87d0027242b76475f51be3f57, type: 2}
-  WaterColor: {r: 0, g: 0.7042556, b: 1, a: 1}
+  WaterColor: {r: 0.25882354, g: 0.57254905, b: 0.97647065, a: 1}
+  IsRenderInShader: 1
+  IsBoundsDrawed: 1
