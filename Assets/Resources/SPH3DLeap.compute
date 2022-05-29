@@ -101,6 +101,12 @@ inline float CalculateDensity(float r_sq) {
 	return _DensityCoef * (h_sq - r_sq) * (h_sq - r_sq) * (h_sq - r_sq);
 }
 
+inline float3 VelocityCorrection(float r_sq, float3 P_velocity, float3 N_velocity, float N_density,float P_density)
+ {
+	const float h_sq = _Smoothlen * _Smoothlen;
+	return (P_velocity - N_velocity) *_DensityCoef * (h_sq - r_sq) * (h_sq - r_sq) * (h_sq - r_sq)/(P_density+ N_density);
+ }
+
 /// Becker2007 Implementation of uncompressed conditions:
 /// Pressure = B * ((rho / rho_0)^gamma  - 1)
 /// The pressure constant B should be calculated accurately, but it is not suitable for real time, so set it to an appropriate value.
@@ -209,6 +215,40 @@ void DensityCS(uint3 DTid : SV_DispatchThreadID) {
 	_ParticlesDensityBufferWrite[P_ID].density = density;
 }
 
+[numthreads(THREAD_SIZE_X, 1, 1)]
+void VelocityCorrectionCS(uint3 DTid : SV_DispatchThreadID) {
+	uint P_ID = DTid.x;	// Particle ID currently being processed
+
+	float h_sq = _Smoothlen * _Smoothlen;
+	float3 P_position = _ParticlesBufferRead[P_ID].position;
+	float3 P_velocity = _ParticlesBufferRead[P_ID].velocity;
+	float  P_density = _ParticlesDensityBufferRead[P_ID].density;
+
+	// TODO:convert To hash
+	// Neighborhood search(O(n^2))
+	float3 velCorrection = float3(0, 0, 0);
+
+	for (uint N_ID = 0; N_ID < (uint)_NumParticles; N_ID++) {
+		if (N_ID == P_ID) continue;	// Skip if self is the calculation target
+
+		float3 N_position = _ParticlesBufferRead[N_ID].position;
+		// N=j
+		// P=i
+		float3 diff = N_position - P_position;	// Particle distance
+		float r_sq = dot(diff, diff);			// Particle distance squared
+
+		// Exclude particles that do not fit within the radius
+		if (r_sq < h_sq) {
+			float  N_density = _ParticlesDensityBufferRead[N_ID].density;
+			float3 N_velocity = _ParticlesBufferRead[N_ID].velocity;
+
+			velCorrection += VelocityCorrection(r_sq,P_velocity, N_velocity, N_density,P_density)
+		}
+	}
+	P_velocity += velCorrection
+	// Update density buffer
+	_ParticlesDensityBufferWrite[P_ID].velocity = P_velocity;
+}
 
 //--------------------------------------------------------------------------------------
 // Pressure calculation ///  equation Tait
