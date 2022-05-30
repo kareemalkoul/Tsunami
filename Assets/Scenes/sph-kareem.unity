@@ -211,8 +211,12 @@ PrefabInstance:
       value: 5
       objectReference: {fileID: 0}
     - target: {fileID: 3940404416909209042, guid: 9571e6baab469384e9372a4150288837, type: 3}
+      propertyPath: particleNum
+      value: 8192
+      objectReference: {fileID: 0}
+    - target: {fileID: 3940404416909209042, guid: 9571e6baab469384e9372a4150288837, type: 3}
       propertyPath: particleRadius
-      value: 5
+      value: 0.1
       objectReference: {fileID: 0}
     - target: {fileID: 3940404416909209042, guid: 9571e6baab469384e9372a4150288837, type: 3}
       propertyPath: initParticleWay
@@ -224,7 +228,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 3940404416909209042, guid: 9571e6baab469384e9372a4150288837, type: 3}
       propertyPath: separationFactor
-      value: 7.29
+      value: 1.4
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 9571e6baab469384e9372a4150288837, type: 3}

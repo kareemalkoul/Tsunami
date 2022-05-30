@@ -1,6 +1,6 @@
 ﻿using UnityEngine;
 using System.Runtime.InteropServices;
-
+using System.Collections.Generic;
 namespace Kareem.Fluid.SPH
 {
     public struct FluidParticle3D
@@ -11,6 +11,9 @@ namespace Kareem.Fluid.SPH
 
     public class Fluid3D : FluidBase3D<FluidParticle3D>
     {
+        [HideInInspector]
+        private List<GameObject> ParticlesGameObjec;
+
         [SerializeField]
         private float MouseInteractionRadius = 1f; // Wide range of mouse interactions
 
@@ -31,7 +34,7 @@ namespace Kareem.Fluid.SPH
         [HideInInspector, SerializeField]
         public float separationFactor = 1.4f;
 
-        [HideInInspector]
+        [HideInInspector, SerializeField]
         private float volume = 1;
 
         [HideInInspector, SerializeField]
@@ -50,7 +53,6 @@ namespace Kareem.Fluid.SPH
         {
             switch (initParticleWay)
             {
-
                 case InitParticleWay.SPHERE:
                     initSphereMethod(ref particles);
                     break;
@@ -59,20 +61,21 @@ namespace Kareem.Fluid.SPH
                     break;
             }
 
-
-
             if (createGameObject)
                 CreateGameObjectForParticles(ref particles);
         }
 
         void CreateGameObjectForParticles(ref FluidParticle3D[] particles)
         {
+            if (ParticlesGameObjec == null)
+                ParticlesGameObjec = new List<GameObject>();
             for (int i = 0; i < NumParticles; i++)
             {
-                GameObject o = new GameObject();
-                o.name = "Particle " + i;
-                o.transform.position = particles[i].Position;
-                o.transform.parent = gameObject.transform;
+                GameObject particle = new GameObject();
+                particle.name = "Particle " + i;
+                particle.transform.position = particles[i].Position;
+                particle.transform.parent = gameObject.transform;
+                ParticlesGameObjec.Add(particle);
             }
         }
 
@@ -160,6 +163,27 @@ namespace Kareem.Fluid.SPH
             cs.SetVector("_MousePos", screenToWorldPointPos);
             cs.SetFloat("_MouseRadius", MouseInteractionRadius);
             cs.SetBool("_MouseDown", isMouseDown);
+        }
+
+
+        public void RestartSimulation()
+        {
+            if (ParticlesGameObjec != null)
+                DestroyGameObjects();
+
+            DeleteBuffers();
+            Init();
+            InitBuffers();
+
+        }
+
+        private void DestroyGameObjects()
+        {
+            foreach (GameObject particle in ParticlesGameObjec)
+            {
+                Destroy(particle);
+            }
+            ParticlesGameObjec.Clear();
         }
 
         public float BallRadius

@@ -93,9 +93,7 @@ namespace Kareem.Fluid.SPH
         #region Mono
         protected virtual void Awake()
         {
-            if (fluidCS == null)
-                fluidCS = (ComputeShader)Resources.Load("SPH3D");
-            numParticles = (int)particleNum;
+            Init();
         }
 
         protected virtual void Start()
@@ -153,16 +151,9 @@ namespace Kareem.Fluid.SPH
             }
         }
 
-        private void OnDestroy()
+        protected void OnDestroy()
         {
-            DeleteBuffer(debugBuffer);
-            DeleteBuffer(particlesBufferRead);
-            DeleteBuffer(particlesBufferWrite);
-            DeleteBuffer(particlesPressureBuffer);
-            DeleteBuffer(particleDensitiesBuffer);
-            DeleteBuffer(particleForcesBuffer);
-            DeleteBuffer(particleForcesOldBufferRead);
-            DeleteBuffer(particleForcesOldBufferWrite);
+            DeleteBuffers();
         }
 
         #endregion Mono
@@ -242,10 +233,17 @@ namespace Kareem.Fluid.SPH
         /// <param name="particles"></param>
         protected abstract void InitParticleData(ref T[] particles);
 
+
+        protected void Init()
+        {
+            if (fluidCS == null)
+                fluidCS = (ComputeShader)Resources.Load("SPH3D");
+            numParticles = (int)particleNum;
+        }
         /// <summary>
         /// Buffer initialization
         /// </summary>
-        private void InitBuffers()
+        protected void InitBuffers()
         {
             var particles = new T[numParticles];
             InitParticleData(ref particles);
@@ -298,6 +296,18 @@ namespace Kareem.Fluid.SPH
                 buffer.Release();
                 buffer = null;
             }
+        }
+
+        protected void DeleteBuffers()
+        {
+            DeleteBuffer(debugBuffer);
+            DeleteBuffer(particlesBufferRead);
+            DeleteBuffer(particlesBufferWrite);
+            DeleteBuffer(particlesPressureBuffer);
+            DeleteBuffer(particleDensitiesBuffer);
+            DeleteBuffer(particleForcesBuffer);
+            DeleteBuffer(particleForcesOldBufferRead);
+            DeleteBuffer(particleForcesOldBufferWrite);
         }
     }
 }

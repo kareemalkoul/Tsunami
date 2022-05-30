@@ -29,6 +29,11 @@ namespace Kareem.Fluid.SPH
                     break;
             }
 
+            if (GUILayout.Button("Restart Simulation"))
+            {
+                fluid3D.RestartSimulation();
+            }
+
         }
 
         void Sphere(ref Fluid3D fluid3D)
