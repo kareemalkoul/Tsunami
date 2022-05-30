@@ -8,23 +8,21 @@ namespace Kareem.Fluid.SPH
     [CustomEditor(typeof(Fluid3D), true)]
     public class Fluid3DEditor : Editor
     {
+
+
         public override void OnInspectorGUI()
         {
             //this method for create default monoBehavior fields
             //that i make it in base class (Fluid3D)
             DrawDefaultInspector();
+
             EditorUtility.SetDirty(target);
-
-            SerializedProperty zz = serializedObject.FindProperty("Particle Radius");
-
-            // Debug.Log(zz.intValue);
             Fluid3D fluid3D = (Fluid3D)target;
 
             switch (fluid3D.initParticleWay)
             {
                 case InitParticleWay.SPHERE:
                     Sphere(ref fluid3D);
-
                     break;
                 case InitParticleWay.CUBE:
                     Cube(ref fluid3D);

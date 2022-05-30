@@ -25,16 +25,16 @@ namespace Kareem.Fluid.SPH
 
         ///
         ///Hide fields
-        [HideInInspector]
+        [HideInInspector, SerializeField]
         private float ballRadius = 0.1f; // Circular radius at particle position initialization
 
-        [HideInInspector]
+        [HideInInspector, SerializeField]
         public float separationFactor = 1.4f;
 
         [HideInInspector]
         private float volume = 1;
 
-        [HideInInspector]
+        [HideInInspector, SerializeField]
         private float particleRadius = 0.15f; // Radius for a particle
 
         ///finish Hide Fields
