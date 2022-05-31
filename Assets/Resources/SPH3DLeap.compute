@@ -387,8 +387,6 @@
 // 	_ParticlesBufferWrite[P_ID].position = position;
 // 	_ParticlesBufferWrite[P_ID].velocity = velocity;
 
-   
-
 // }
 
 
