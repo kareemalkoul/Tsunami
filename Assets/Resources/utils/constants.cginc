@@ -15,8 +15,11 @@ cbuffer CB {
 	float _Viscosity;			// Viscosity coefficient
 	float3 _Gravity;			// gravity
 	float3 _Range;				// Simulation space
-	float _tensionThreshold;	//Tension Threshold
-	float _tensionCoefficient;	//Tension Coefficient
+	float _tensionThreshold;	// Tension Threshold
+	float _tensionCoefficient;	// Tension Coefficient
+	float _Damping;				// Damping for wall boundary
+	float3 _Origin;				// reefrence point
+	bool _oddStep; 				// update postion depened on leap method  
 
 	float3 _MousePos;			// Mouse position
 	float _MouseRadius;			// Radius of mouse interaction

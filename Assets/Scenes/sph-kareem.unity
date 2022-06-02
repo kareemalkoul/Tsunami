@@ -212,7 +212,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 3940404416909209042, guid: 9571e6baab469384e9372a4150288837, type: 3}
       propertyPath: particleNum
-      value: 32768
+      value: 16384
       objectReference: {fileID: 0}
     - target: {fileID: 3940404416909209042, guid: 9571e6baab469384e9372a4150288837, type: 3}
       propertyPath: particleRadius
@@ -484,7 +484,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 361318686889559027, guid: 9571e6baab469384e9372a4150288837, type: 3}
       propertyPath: m_RootOrder
-      value: 5
+      value: 6
       objectReference: {fileID: 0}
     - target: {fileID: 361318686889559027, guid: 9571e6baab469384e9372a4150288837, type: 3}
       propertyPath: m_LocalPosition.x
@@ -525,6 +525,18 @@ PrefabInstance:
     - target: {fileID: 361318686889559027, guid: 9571e6baab469384e9372a4150288837, type: 3}
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3940404416909209042, guid: 9571e6baab469384e9372a4150288837, type: 3}
+      propertyPath: Damping
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 3940404416909209042, guid: 9571e6baab469384e9372a4150288837, type: 3}
+      propertyPath: particleNum
+      value: 16384
+      objectReference: {fileID: 0}
+    - target: {fileID: 3940404416909209042, guid: 9571e6baab469384e9372a4150288837, type: 3}
+      propertyPath: maxAllowableTimestep
+      value: 0.004166667
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 9571e6baab469384e9372a4150288837, type: 3}
@@ -687,7 +699,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 361318686889559020, guid: 9571e6baab469384e9372a4150288837, type: 3}
       propertyPath: m_IsActive
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 361318686889559026, guid: 9571e6baab469384e9372a4150288837, type: 3}
       propertyPath: fluidCS
@@ -711,7 +723,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 361318686889559027, guid: 9571e6baab469384e9372a4150288837, type: 3}
       propertyPath: m_RootOrder
-      value: 6
+      value: 5
       objectReference: {fileID: 0}
     - target: {fileID: 361318686889559027, guid: 9571e6baab469384e9372a4150288837, type: 3}
       propertyPath: m_LocalPosition.x
@@ -731,100 +743,15 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 361318686889559027, guid: 9571e6baab469384e9372a4150288837, type: 3}
       propertyPath: m_LocalRotation.x
-      value: 0
+      value: -0
       objectReference: {fileID: 0}
     - target: {fileID: 361318686889559027, guid: 9571e6baab469384e9372a4150288837, type: 3}
       propertyPath: m_LocalRotation.y
-      value: 0
+      value: -0
       objectReference: {fileID: 0}
     - target: {fileID: 361318686889559027, guid: 9571e6baab469384e9372a4150288837, type: 3}
       propertyPath: m_LocalRotation.z
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 361318686889559027, guid: 9571e6baab469384e9372a4150288837, type: 3}
-      propertyPath: m_LocalEulerAnglesHint.x
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 361318686889559027, guid: 9571e6baab469384e9372a4150288837, type: 3}
-      propertyPath: m_LocalEulerAnglesHint.y
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 361318686889559027, guid: 9571e6baab469384e9372a4150288837, type: 3}
-      propertyPath: m_LocalEulerAnglesHint.z
-      value: 0
-      objectReference: {fileID: 0}
-    m_RemovedComponents: []
-  m_SourcePrefab: {fileID: 100100000, guid: 9571e6baab469384e9372a4150288837, type: 3}
---- !u!1001 &1733374164
-PrefabInstance:
-  m_ObjectHideFlags: 0
-  serializedVersion: 2
-  m_Modification:
-    m_TransformParent: {fileID: 0}
-    m_Modifications:
-    - target: {fileID: 361318686889559020, guid: 9571e6baab469384e9372a4150288837, type: 3}
-      propertyPath: m_Name
-      value: Fluid3DCorrectionVelocity
-      objectReference: {fileID: 0}
-    - target: {fileID: 361318686889559020, guid: 9571e6baab469384e9372a4150288837, type: 3}
-      propertyPath: m_IsActive
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 361318686889559026, guid: 9571e6baab469384e9372a4150288837, type: 3}
-      propertyPath: fluidCS
-      value: 
-      objectReference: {fileID: 7200000, guid: 458fbf94ee3b84a4abc12a2763464c81, type: 3}
-    - target: {fileID: 361318686889559026, guid: 9571e6baab469384e9372a4150288837, type: 3}
-      propertyPath: range.x
-      value: 10
-      objectReference: {fileID: 0}
-    - target: {fileID: 361318686889559026, guid: 9571e6baab469384e9372a4150288837, type: 3}
-      propertyPath: range.z
-      value: 10
-      objectReference: {fileID: 0}
-    - target: {fileID: 361318686889559026, guid: 9571e6baab469384e9372a4150288837, type: 3}
-      propertyPath: ballRadius
-      value: 0.1
-      objectReference: {fileID: 0}
-    - target: {fileID: 361318686889559026, guid: 9571e6baab469384e9372a4150288837, type: 3}
-      propertyPath: iterations
-      value: 4
-      objectReference: {fileID: 0}
-    - target: {fileID: 361318686889559026, guid: 9571e6baab469384e9372a4150288837, type: 3}
-      propertyPath: particleNum
-      value: 32768
-      objectReference: {fileID: 0}
-    - target: {fileID: 361318686889559027, guid: 9571e6baab469384e9372a4150288837, type: 3}
-      propertyPath: m_RootOrder
-      value: 7
-      objectReference: {fileID: 0}
-    - target: {fileID: 361318686889559027, guid: 9571e6baab469384e9372a4150288837, type: 3}
-      propertyPath: m_LocalPosition.x
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 361318686889559027, guid: 9571e6baab469384e9372a4150288837, type: 3}
-      propertyPath: m_LocalPosition.y
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 361318686889559027, guid: 9571e6baab469384e9372a4150288837, type: 3}
-      propertyPath: m_LocalPosition.z
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 361318686889559027, guid: 9571e6baab469384e9372a4150288837, type: 3}
-      propertyPath: m_LocalRotation.w
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 361318686889559027, guid: 9571e6baab469384e9372a4150288837, type: 3}
-      propertyPath: m_LocalRotation.x
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 361318686889559027, guid: 9571e6baab469384e9372a4150288837, type: 3}
-      propertyPath: m_LocalRotation.y
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 361318686889559027, guid: 9571e6baab469384e9372a4150288837, type: 3}
-      propertyPath: m_LocalRotation.z
-      value: 0
+      value: -0
       objectReference: {fileID: 0}
     - target: {fileID: 361318686889559027, guid: 9571e6baab469384e9372a4150288837, type: 3}
       propertyPath: m_LocalEulerAnglesHint.x
@@ -839,32 +766,20 @@ PrefabInstance:
       value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 3940404416909209042, guid: 9571e6baab469384e9372a4150288837, type: 3}
+      propertyPath: Damping
+      value: 0.35
+      objectReference: {fileID: 0}
+    - target: {fileID: 3940404416909209042, guid: 9571e6baab469384e9372a4150288837, type: 3}
       propertyPath: fluidCS
       value: 
-      objectReference: {fileID: 7200000, guid: b265319d0d7158a4aa600ce379565f36, type: 3}
+      objectReference: {fileID: 7200000, guid: 9febf1bca6b774f4f98657afcf01d592, type: 3}
     - target: {fileID: 3940404416909209042, guid: 9571e6baab469384e9372a4150288837, type: 3}
       propertyPath: ballRadius
       value: 5
       objectReference: {fileID: 0}
     - target: {fileID: 3940404416909209042, guid: 9571e6baab469384e9372a4150288837, type: 3}
       propertyPath: particleNum
-      value: 32768
-      objectReference: {fileID: 0}
-    - target: {fileID: 3940404416909209042, guid: 9571e6baab469384e9372a4150288837, type: 3}
-      propertyPath: particleRadius
-      value: 0.1
-      objectReference: {fileID: 0}
-    - target: {fileID: 3940404416909209042, guid: 9571e6baab469384e9372a4150288837, type: 3}
-      propertyPath: initParticleWay
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 3940404416909209042, guid: 9571e6baab469384e9372a4150288837, type: 3}
-      propertyPath: createGameObject
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 3940404416909209042, guid: 9571e6baab469384e9372a4150288837, type: 3}
-      propertyPath: separationFactor
-      value: 1.4
+      value: 16384
       objectReference: {fileID: 0}
     - target: {fileID: 3940404416909209042, guid: 9571e6baab469384e9372a4150288837, type: 3}
       propertyPath: maxAllowableTimestep

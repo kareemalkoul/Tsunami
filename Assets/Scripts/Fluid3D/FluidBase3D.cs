@@ -49,6 +49,10 @@ namespace Kareem.Fluid.SPH
         [SerializeField]
         protected float tensionCoefficient = 0.0728f;
 
+        [SerializeField, Range(0.0f, 1.0f)]
+        protected float Damping = 0.0728f;
+
+
         private int numParticles; // Number of particles
         private float timeStep; // Time step width
         private float densityCoef; // Poly6 kernel density coefficient
@@ -140,7 +144,9 @@ namespace Kareem.Fluid.SPH
             fluidCS.SetFloat("_WallStiffness", wallStiffness);
             fluidCS.SetVector("_Range", range);
             fluidCS.SetVector("_Gravity", gravity);
+            fluidCS.SetFloat("_Damping", Damping);
             fluidCS.SetBool("_oddStep", oddStep);
+
 
             AdditionalCSParams(fluidCS);
 
@@ -196,19 +202,18 @@ namespace Kareem.Fluid.SPH
             fluidCS.SetBuffer(kernelID, "_ParticlesForceBufferRead", particleForcesBuffer);
             fluidCS.SetBuffer(kernelID, "_ParticlesBufferWrite", particlesBufferWrite);
 
-            fluidCS.SetBuffer(
-                kernelID,
-                "_ParticlesForceOldBufferWrite",
-                particleForcesOldBufferWrite
-            );
-            fluidCS.SetBuffer(
-                kernelID,
-                "_ParticlesForceOldBufferRead",
-                particleForcesOldBufferRead
-            );
-
+            fluidCS.SetBuffer(kernelID, "_ParticlesForceOldBufferWrite", particleForcesOldBufferWrite);
+            fluidCS.SetBuffer(kernelID, "_ParticlesForceOldBufferRead", particleForcesOldBufferRead);
             fluidCS.Dispatch(kernelID, threadGroupsX, 1, 1);
 
+
+            // Vel Correction
+            // kernelID = fluidCS.FindKernel("VelocityCorrectionCS");
+            // fluidCS.SetBuffer(kernelID, "_ParticlesBufferRead", particlesBufferRead);
+            // fluidCS.SetBuffer(kernelID, "_ParticlesDensityBufferRead", particleDensitiesBuffer);
+            // fluidCS.SetBuffer(kernelID, "_ParticlesBufferWrite", particlesBufferWrite);
+
+            fluidCS.Dispatch(kernelID, threadGroupsX, 1, 1);
             var result = new float[threadGroupsX];
             debugBuffer.GetData(result);
             foreach (var eachResult in result)

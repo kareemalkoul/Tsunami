@@ -4,7 +4,7 @@
 #include "utils/buffers.cginc"
 #include "utils/constants.cginc"
 
-#include "collison_detection/normalWallBoundary.cginc"
+#include "collison_detection/normalWallBoundray.cginc"
 
 #pragma kernel DensityCS
 #pragma kernel PressureCS
@@ -157,7 +157,7 @@ void IntegrateCS(uint3 DTid : SV_DispatchThreadID) {
 	// Here to write collision detection -----
 
 	// Wall boundary
-	velocity=normalWallboundray(velocity,position,_Range,0.8f);
+	normalWallboundray(velocity,position);
 
 	// Gravity addition
 	//TODO:must _Gravity*_mass

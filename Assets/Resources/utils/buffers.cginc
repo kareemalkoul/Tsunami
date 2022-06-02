@@ -15,4 +15,9 @@ RWStructuredBuffer<ParticlePressure> _ParticlesPressureBufferWrite;
 // Buffer that holds particle acceleration (force)
 StructuredBuffer  <ParticleForces>  _ParticlesForceBufferRead;
 RWStructuredBuffer<ParticleForces>  _ParticlesForceBufferWrite;
+
+// Buffer that holds particle old acceleration (force)
+StructuredBuffer  <ParticleForcesOld>  _ParticlesForceOldBufferRead;
+RWStructuredBuffer<ParticleForcesOld>  _ParticlesForceOldBufferWrite;
+
 // ▲ Structured buffer definition ---------------------
