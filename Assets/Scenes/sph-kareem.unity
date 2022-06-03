@@ -136,7 +136,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 361318686889559020, guid: 9571e6baab469384e9372a4150288837, type: 3}
       propertyPath: m_IsActive
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 361318686889559026, guid: 9571e6baab469384e9372a4150288837, type: 3}
       propertyPath: fluidCS
@@ -207,6 +207,10 @@ PrefabInstance:
       value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 3940404416909209042, guid: 9571e6baab469384e9372a4150288837, type: 3}
+      propertyPath: hashCS
+      value: 
+      objectReference: {fileID: 7200000, guid: 21c48cbfe08bf6243b9ed40e3a1b491f, type: 3}
+    - target: {fileID: 3940404416909209042, guid: 9571e6baab469384e9372a4150288837, type: 3}
       propertyPath: ballRadius
       value: 5
       objectReference: {fileID: 0}
@@ -220,7 +224,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 3940404416909209042, guid: 9571e6baab469384e9372a4150288837, type: 3}
       propertyPath: initParticleWay
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 3940404416909209042, guid: 9571e6baab469384e9372a4150288837, type: 3}
       propertyPath: createGameObject
@@ -699,7 +703,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 361318686889559020, guid: 9571e6baab469384e9372a4150288837, type: 3}
       propertyPath: m_IsActive
-      value: 1
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 361318686889559026, guid: 9571e6baab469384e9372a4150288837, type: 3}
       propertyPath: fluidCS
@@ -766,6 +770,10 @@ PrefabInstance:
       value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 3940404416909209042, guid: 9571e6baab469384e9372a4150288837, type: 3}
+      propertyPath: hashCS
+      value: 
+      objectReference: {fileID: 7200000, guid: 21c48cbfe08bf6243b9ed40e3a1b491f, type: 3}
+    - target: {fileID: 3940404416909209042, guid: 9571e6baab469384e9372a4150288837, type: 3}
       propertyPath: Damping
       value: 0.35
       objectReference: {fileID: 0}
@@ -779,7 +787,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 3940404416909209042, guid: 9571e6baab469384e9372a4150288837, type: 3}
       propertyPath: particleNum
-      value: 16384
+      value: 2048
+      objectReference: {fileID: 0}
+    - target: {fileID: 3940404416909209042, guid: 9571e6baab469384e9372a4150288837, type: 3}
+      propertyPath: initParticleWay
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 3940404416909209042, guid: 9571e6baab469384e9372a4150288837, type: 3}
       propertyPath: maxAllowableTimestep

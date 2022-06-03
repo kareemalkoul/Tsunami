@@ -62,9 +62,16 @@ namespace Kareem.Fluid.SPH
         private float gradTensionCoef; // Tension coefficient of grad kernel
         private bool oddStep;
 
+        #region hashVars
+        public int dimensions = 100;
+        public int maximumParticlesPerCell = 500;
+
+        #endregion
         #region DirectCompute
         [SerializeField]
         ComputeShader fluidCS;
+        [SerializeField]
+        ComputeShader hashCS;
         private static readonly int THREAD_SIZE_X = 1024; // Number of threads on the compute shader side
         private ComputeBuffer particlesBufferRead; // Buffer to hold particle data
         private ComputeBuffer particlesBufferWrite; // Buffer to write particle data
@@ -74,6 +81,10 @@ namespace Kareem.Fluid.SPH
         private ComputeBuffer particleForcesOldBufferRead; // Buffer that holds particle old acceleration data
         private ComputeBuffer particleForcesOldBufferWrite; // Buffer that holds particle old acceleration data
         private ComputeBuffer debugBuffer; // Debug buffer
+        private ComputeBuffer _neighbourListBuffer;
+        private ComputeBuffer _neighbourTrackerBuffer;
+        private ComputeBuffer _hashGridBuffer;
+        private ComputeBuffer _hashGridTrackerBuffer;
         #endregion
 
         #region Accessor
@@ -147,6 +158,9 @@ namespace Kareem.Fluid.SPH
             fluidCS.SetFloat("_Damping", Damping);
             fluidCS.SetBool("_oddStep", oddStep);
 
+            hashCS.SetFloat("CellSize", smoothlen * 2);
+            hashCS.SetInt("Dimensions", dimensions);
+            hashCS.SetInt("maximumParticlesPerCell", maximumParticlesPerCell);
 
             AdditionalCSParams(fluidCS);
 
@@ -169,14 +183,35 @@ namespace Kareem.Fluid.SPH
         /// </summary>
         private void RunFluidSolver()
         {
-            // TODO:why -1 ? is -1 for init the value?
             int kernelID = -1;
             // num of particle to each Thread
             //if 1K particles then 1 for each thread ,2 for 2k and 4 for 4k ,...etc.because the numParticles n*1.024 and the size_x is 1024
             int threadGroupsX = numParticles / THREAD_SIZE_X;
+            //init hash
+            kernelID = hashCS.FindKernel("ClearHashGrid");
+            hashCS.SetBuffer(kernelID, "_hashGridTracker", _hashGridTrackerBuffer);
+            hashCS.Dispatch(kernelID,  dimensions * dimensions * dimensions / THREAD_SIZE_X, 1, 1);
+
+
+            kernelID = hashCS.FindKernel("RecalculateHashGrid");
+            hashCS.SetBuffer(kernelID, "_ParticlesBufferRead", particlesBufferRead);
+            hashCS.SetBuffer(kernelID, "_hashGrid", _hashGridBuffer);
+            hashCS.SetBuffer(kernelID, "_hashGridTracker", _hashGridTrackerBuffer);
+            hashCS.Dispatch(kernelID, threadGroupsX, 1, 1);
+
+            kernelID = hashCS.FindKernel("BuildNeighbourList");
+            hashCS.SetBuffer(kernelID, "_ParticlesBufferRead", particlesBufferRead);
+            hashCS.SetBuffer(kernelID, "_hashGrid", _hashGridBuffer);
+            hashCS.SetBuffer(kernelID, "_hashGridTracker", _hashGridTrackerBuffer);
+            hashCS.SetBuffer(kernelID, "_neighbourList", _neighbourListBuffer);
+            hashCS.SetBuffer(kernelID, "_neighbourTracker", _neighbourTrackerBuffer);
+            hashCS.Dispatch(kernelID, threadGroupsX, 1, 1);
 
             // Density
             kernelID = fluidCS.FindKernel("DensityCS");
+            fluidCS.SetBuffer(kernelID, "_neighbourTracker", _neighbourTrackerBuffer);
+            fluidCS.SetBuffer(kernelID, "_neighbourList", _neighbourListBuffer);
+
             fluidCS.SetBuffer(kernelID, "_ParticlesBufferRead", particlesBufferRead);
             fluidCS.SetBuffer(kernelID, "_ParticlesDensityBufferWrite", particleDensitiesBuffer);
             fluidCS.Dispatch(kernelID, threadGroupsX, 1, 1);
@@ -189,6 +224,9 @@ namespace Kareem.Fluid.SPH
 
             // Force
             kernelID = fluidCS.FindKernel("ForceCS");
+            fluidCS.SetBuffer(kernelID, "_neighbourTracker", _neighbourTrackerBuffer);
+            fluidCS.SetBuffer(kernelID, "_neighbourList", _neighbourListBuffer);
+
             fluidCS.SetBuffer(kernelID, "_ParticlesBufferRead", particlesBufferRead);
             fluidCS.SetBuffer(kernelID, "_ParticlesDensityBufferRead", particleDensitiesBuffer);
             fluidCS.SetBuffer(kernelID, "_ParticlesPressureBufferRead", particlesPressureBuffer);
@@ -243,6 +281,8 @@ namespace Kareem.Fluid.SPH
         {
             if (fluidCS == null)
                 fluidCS = (ComputeShader)Resources.Load("SPH3D");
+            if (hashCS == null)
+                hashCS = (ComputeShader)Resources.Load("hash.compute");
             numParticles = (int)particleNum;
         }
         /// <summary>
@@ -278,6 +318,23 @@ namespace Kareem.Fluid.SPH
                 numParticles,
                 Marshal.SizeOf(typeof(FluidParticleForces3D))
             );
+
+           // int[] _neighbourList = new int[NumParticles * maximumParticlesPerCell * 8];   // 8 because we consider 8 cells
+            _neighbourListBuffer = new ComputeBuffer(NumParticles * maximumParticlesPerCell * 8, sizeof(int));
+            //_neighbourListBuffer.SetData(_neighbourList);
+          //  int[] _neighbourTracker = new int[NumParticles];
+
+          //  uint[] _hashGrid = new uint[dimensions * dimensions * dimensions * maximumParticlesPerCell];
+         //   uint[] _hashGridTracker = new uint[dimensions * dimensions * dimensions];
+
+           
+            _neighbourTrackerBuffer = new ComputeBuffer(NumParticles, sizeof(int));
+           // _neighbourTrackerBuffer.SetData(_neighbourTracker);
+
+            _hashGridBuffer = new ComputeBuffer(dimensions * dimensions * dimensions * maximumParticlesPerCell, sizeof(uint));
+           // _hashGridBuffer.SetData(_hashGrid);
+            _hashGridTrackerBuffer = new ComputeBuffer(dimensions * dimensions * dimensions, sizeof(uint));
+          //  _hashGridTrackerBuffer.SetData(_hashGridTracker);
         }
 
         /// <summary>
@@ -313,6 +370,11 @@ namespace Kareem.Fluid.SPH
             DeleteBuffer(particleForcesBuffer);
             DeleteBuffer(particleForcesOldBufferRead);
             DeleteBuffer(particleForcesOldBufferWrite);
+
+            DeleteBuffer(_neighbourListBuffer);
+            DeleteBuffer(_neighbourTrackerBuffer);
+            DeleteBuffer(_hashGridBuffer);
+            DeleteBuffer(_hashGridTrackerBuffer);
         }
     }
 }

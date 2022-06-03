@@ -24,5 +24,9 @@ cbuffer CB {
 	float3 _MousePos;			// Mouse position
 	float _MouseRadius;			// Radius of mouse interaction
 	bool _MouseDown;			// Is the mouse pressed
+
+    float CellSize;
+    int Dimensions;
+    int maximumParticlesPerCell;
 };
 // ▲ Definition of shader constants -----------------------

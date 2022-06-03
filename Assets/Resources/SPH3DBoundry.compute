@@ -38,23 +38,16 @@ void DensityCS(uint3 DTid : SV_DispatchThreadID) {
 	// TODO:convert To hash
 	// Neighborhood search(O(n^2))
 	float density = 0;
-	for (uint N_ID = 0; N_ID < (uint)_NumParticles; N_ID++) {
-		if (N_ID == P_ID) continue;	// Skip if self is the calculation target
-
-		float3 N_position = _ParticlesBufferRead[N_ID].position;
-		// N=j
-		// P=i
+	for (uint N_ID = 0; N_ID < (uint)_neighbourTracker[DTid.x]; N_ID++) {
+  		int neighbourIndex = _neighbourList[DTid.x * maximumParticlesPerCell * 8 + N_ID];
+		float3 N_position = _ParticlesBufferRead[neighbourIndex].position;
 		float3 diff = N_position - P_position;	// Particle distance
 		float r_sq = dot(diff, diff);			// Particle distance squared
-
-		// Exclude particles that do not fit within the radius
-		if (r_sq < h_sq) {
-			density += CalculateDensity(r_sq);	// No need to take the route
-		}
+		density += CalculateDensity(r_sq);	// No need to take the route
 	}
 
 	// Update density buffer
-	_ParticlesDensityBufferWrite[P_ID].density = density;
+	_ParticlesDensityBufferWrite[P_ID].density = density+ 0.000001f;
 }
 
 
@@ -94,33 +87,28 @@ void ForceCS(uint3 DTid : SV_DispatchThreadID) {
 	// float3 surfaceTension = float3(0, 0, 0);
 	ColorField temp;
 	ColorField color;
-	for (uint N_ID = 0; N_ID < (uint)_NumParticles; N_ID++) {
-		if (N_ID == P_ID) continue;	// Skip if targeting yourself
+	for (uint N_ID = 0; N_ID < (uint)_neighbourTracker[DTid.x]; N_ID++) {
+		  int neighbourIndex = _neighbourList[DTid.x * maximumParticlesPerCell * 8 + N_ID];
 
-		float3 N_position = _ParticlesBufferRead[N_ID].position;
+		float3 N_position = _ParticlesBufferRead[neighbourIndex].position;
 
 		float3 diff = N_position - P_position;
 		float r_sq = dot(diff, diff);
 
-		// Exclude particles that do not fit within the radius
-		if (r_sq < h_sq) {	
-			float  N_density = _ParticlesDensityBufferRead[N_ID].density;
-			float  N_pressure = _ParticlesPressureBufferRead[N_ID].pressure;
-			float3 N_velocity = _ParticlesBufferRead[N_ID].velocity;
-			float  r = sqrt(r_sq);
+		float  N_density = _ParticlesDensityBufferRead[neighbourIndex].density;
+		float  N_pressure = _ParticlesPressureBufferRead[neighbourIndex].pressure;
+		float3 N_velocity = _ParticlesBufferRead[neighbourIndex].velocity;
+		float  r = sqrt(r_sq);
 
-			// Pressure term
-			press += CalculateGradPressure(r, P_pressure, N_pressure, N_density, diff);
+		// Pressure term
+		press += CalculateGradPressure(r, P_pressure, N_pressure, N_density, diff);
 
-			// sticky item
-			visco += CalculateLapVelocity(r, P_velocity, N_velocity, N_density);
+		// sticky item
+		visco += CalculateLapVelocity(r, P_velocity, N_velocity, N_density);
 
-			temp=CalculateSurfaceTension(r_sq,N_density,diff);
-			color.colorGradient+=temp.colorGradient;
-			color.colorLaplacian+=temp.colorLaplacian;
-
-
-		}
+		temp=CalculateSurfaceTension(r_sq,N_density,diff);
+		color.colorGradient+=temp.colorGradient;
+		color.colorLaplacian+=temp.colorLaplacian;
 	}
 	float3 colorGradient=color.colorGradient;
 	float madntiude=sqrt(colorGradient.x*colorGradient.x + colorGradient.y*colorGradient.y + colorGradient.z*colorGradient.z);

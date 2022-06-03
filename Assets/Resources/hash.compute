@@ -1,0 +1,140 @@
+
+#pragma kernel ClearHashGrid
+#pragma kernel RecalculateHashGrid
+#pragma kernel BuildNeighbourList
+
+#include "utils/structures.cginc"
+#include "utils/buffers.cginc"
+#include "utils/constants.cginc"
+
+
+
+
+#define THREAD_SIZE_X 1024
+
+#define radius2 (_Smoothlen * _Smoothlen)
+
+int3 GetCell(float3 position)
+{
+    return int3(position.x / CellSize, position.y / CellSize, position.z / CellSize);
+}
+
+int Hash(int3 cell)
+{
+    return cell.x + Dimensions * (cell.y + Dimensions * cell.z);
+}
+
+
+[numthreads(THREAD_SIZE_X,1,1)]
+void ClearHashGrid(uint3 id : SV_DispatchThreadID)
+{
+    _hashGridTracker[id.x] = 0;
+    // NeighbourTracker is (fake) cleared in the neighbour-list-building kernel
+}
+
+[numthreads(THREAD_SIZE_X,1,1)]
+void RecalculateHashGrid(uint3 id : SV_DispatchThreadID)
+{
+    int previousCount = 0;
+    const int cellHash = Hash(GetCell(_ParticlesBufferRead[id.x].position));
+    InterlockedAdd(_hashGridTracker[cellHash], 1, previousCount);
+    if (previousCount >= maximumParticlesPerCell)
+    {
+        return;
+    }
+    _hashGrid[cellHash * maximumParticlesPerCell + previousCount] = id.x;
+}
+
+
+void GetNearbyKeys(int3 originIndex, float3 position, out int nearbyKeys[8])
+{
+    int3 nearbyBucketIndices[8];
+    for (int i = 0; i < 8; i++)
+    {
+        nearbyBucketIndices[i] = originIndex;
+    }
+
+    if (( originIndex.x + 0.5f ) * CellSize <= position.x)
+    {
+        nearbyBucketIndices[4].x += 1;
+        nearbyBucketIndices[5].x += 1;
+        nearbyBucketIndices[6].x += 1;
+        nearbyBucketIndices[7].x += 1;
+    }
+    else
+    {
+        nearbyBucketIndices[4].x -= 1;
+        nearbyBucketIndices[5].x -= 1;
+        nearbyBucketIndices[6].x -= 1;
+        nearbyBucketIndices[7].x -= 1;
+    }
+
+    if (( originIndex.y + 0.5f ) * CellSize <= position.y)
+    {
+        nearbyBucketIndices[2].y += 1;
+        nearbyBucketIndices[3].y += 1;
+        nearbyBucketIndices[6].y += 1;
+        nearbyBucketIndices[7].y += 1;
+    }
+    else
+    {
+        nearbyBucketIndices[2].y -= 1;
+        nearbyBucketIndices[3].y -= 1;
+        nearbyBucketIndices[6].y -= 1;
+        nearbyBucketIndices[7].y -= 1;
+    }
+
+    if (( originIndex.z + 0.5f ) * CellSize <= position.z)
+    {
+        nearbyBucketIndices[1].z += 1;
+        nearbyBucketIndices[3].z += 1;
+        nearbyBucketIndices[5].z += 1;
+        nearbyBucketIndices[7].z += 1;
+    }
+    else
+    {
+        nearbyBucketIndices[1].z -= 1;
+        nearbyBucketIndices[3].z -= 1;
+        nearbyBucketIndices[5].z -= 1;
+        nearbyBucketIndices[7].z -= 1;
+    }
+
+    for (int j = 0; j < 8; j++)
+    {
+        int3 cell = nearbyBucketIndices[j];
+        if (cell.x < 0 || cell.x >= Dimensions || cell.y < 0 || cell.y >= Dimensions || cell.z < 0 || cell.z >= Dimensions)
+        {
+            nearbyKeys[j] = -1;
+        }
+        else
+        {
+            nearbyKeys[j] = Hash(nearbyBucketIndices[j]);
+        }
+    }
+}
+
+[numthreads(THREAD_SIZE_X,1,1)]
+void BuildNeighbourList(uint3 id : SV_DispatchThreadID)
+{
+    _neighbourTracker[id.x] = 0;
+    const int3 cell = GetCell(_ParticlesBufferRead[id.x].position);
+    int cells[8];
+    GetNearbyKeys(cell, _ParticlesBufferRead[id.x].position, cells);
+
+    for (uint j = 0; j < 8; j++)
+    {
+        if (cells[j] == -1) continue; // Grid does not contain cell.
+        const uint numberOfParticlesInCell = min(_hashGridTracker[cells[j]], maximumParticlesPerCell); ;
+        for (uint index = 0; index < numberOfParticlesInCell; index++)
+        {
+            const uint potentialNeighbour = _hashGrid[cells[j] * maximumParticlesPerCell + index];
+            if (potentialNeighbour == id.x) continue;
+            const float3 v = _ParticlesBufferRead[potentialNeighbour].position - _ParticlesBufferRead[id.x].position;
+            if (dot(v, v) < radius2) // Use squared length (= dot) instead of length for performance.
+            {
+                _neighbourList[id.x * maximumParticlesPerCell * 8 + _neighbourTracker[id.x]++] = potentialNeighbour;
+            }
+        }
+    }
+    // n. The Neighbouring-list should be n-particles big, each index containing a list of each particles neighbours in radius r.
+}
