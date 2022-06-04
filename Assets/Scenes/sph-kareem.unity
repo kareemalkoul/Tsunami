@@ -216,7 +216,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 3940404416909209042, guid: 9571e6baab469384e9372a4150288837, type: 3}
       propertyPath: particleNum
-      value: 16384
+      value: 8192
       objectReference: {fileID: 0}
     - target: {fileID: 3940404416909209042, guid: 9571e6baab469384e9372a4150288837, type: 3}
       propertyPath: particleRadius

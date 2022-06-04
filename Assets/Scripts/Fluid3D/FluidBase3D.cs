@@ -63,7 +63,9 @@ namespace Kareem.Fluid.SPH
         private bool oddStep;
 
         #region hashVars
-        public int dimensions = 100;
+        [SerializeField]
+        public int dimensions = 200 ;
+        [SerializeField]
         public int maximumParticlesPerCell = 500;
 
         #endregion
@@ -139,29 +141,9 @@ namespace Kareem.Fluid.SPH
             lapTensionCoef = particleMass * -945 / (32 * Mathf.PI * Mathf.Pow(smoothlen, 9)); // Poly6 for 3D
             oddStep = !oddStep;
             // Transfer of shader constants
-            fluidCS.SetInt("_NumParticles", numParticles);
-            fluidCS.SetFloat("_TimeStep", timeStep);
-            fluidCS.SetFloat("_Smoothlen", smoothlen);
-            fluidCS.SetFloat("_PressureStiffness", pressureStiffness);
-            fluidCS.SetFloat("_GradTensionCoef", gradTensionCoef);
-            fluidCS.SetFloat("_LapTensionCoef", lapTensionCoef);
-            fluidCS.SetFloat("_tensionThreshold", tensionThreshold);
-            fluidCS.SetFloat("_tensionCoefficient", tensionCoefficient);
-            fluidCS.SetFloat("_RestDensity", restDensity);
-            fluidCS.SetFloat("_Viscosity", viscosity);
-            fluidCS.SetFloat("_DensityCoef", densityCoef);
-            fluidCS.SetFloat("_GradPressureCoef", gradPressureCoef);
-            fluidCS.SetFloat("_LapViscosityCoef", lapViscosityCoef);
-            fluidCS.SetFloat("_WallStiffness", wallStiffness);
-            fluidCS.SetVector("_Range", range);
-            fluidCS.SetVector("_Gravity", gravity);
-            fluidCS.SetFloat("_Damping", Damping);
-            fluidCS.SetBool("_oddStep", oddStep);
-
-            hashCS.SetFloat("CellSize", smoothlen * 2);
-            hashCS.SetInt("Dimensions", dimensions);
-            hashCS.SetInt("maximumParticlesPerCell", maximumParticlesPerCell);
-
+            
+            setValues(fluidCS);
+            setValues(hashCS);
             AdditionalCSParams(fluidCS);
 
             // Repeat several times in smaller time steps to improve the accuracy of the calculation.
@@ -169,6 +151,30 @@ namespace Kareem.Fluid.SPH
             {
                 RunFluidSolver();
             }
+        }
+        private void setValues(ComputeShader shader){
+            shader.SetInt("_NumParticles", numParticles);
+            shader.SetFloat("_TimeStep", timeStep);
+            shader.SetFloat("_Smoothlen", smoothlen);
+            shader.SetFloat("_PressureStiffness", pressureStiffness);
+            shader.SetFloat("_GradTensionCoef", gradTensionCoef);
+            shader.SetFloat("_LapTensionCoef", lapTensionCoef);
+            shader.SetFloat("_tensionThreshold", tensionThreshold);
+            shader.SetFloat("_tensionCoefficient", tensionCoefficient);
+            shader.SetFloat("_RestDensity", restDensity);
+            shader.SetFloat("_Viscosity", viscosity);
+            shader.SetFloat("_DensityCoef", densityCoef);
+            shader.SetFloat("_GradPressureCoef", gradPressureCoef);
+            shader.SetFloat("_LapViscosityCoef", lapViscosityCoef);
+            shader.SetFloat("_WallStiffness", wallStiffness);
+            shader.SetVector("_Range", range);
+            shader.SetVector("_Gravity", gravity);
+            shader.SetFloat("_Damping", Damping);
+            shader.SetBool("_oddStep", oddStep);
+
+            shader.SetFloat("CellSize", smoothlen * 2);
+            shader.SetInt("Dimensions", dimensions);
+            shader.SetInt("maximumParticlesPerCell", maximumParticlesPerCell);
         }
 
         protected void OnDestroy()
