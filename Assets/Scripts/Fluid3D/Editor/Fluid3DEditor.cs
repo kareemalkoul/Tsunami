@@ -4,12 +4,11 @@ using UnityEditor;
 
 namespace Kareem.Fluid.SPH
 {
+
     //this class for make custom filed in monobehavoir
     [CustomEditor(typeof(Fluid3D), true)]
     public class Fluid3DEditor : Editor
     {
-
-
         public override void OnInspectorGUI()
         {
             //this method for create default monoBehavior fields
@@ -33,7 +32,6 @@ namespace Kareem.Fluid.SPH
             {
                 fluid3D.RestartSimulation();
             }
-
         }
 
         void Sphere(ref Fluid3D fluid3D)
@@ -43,8 +41,14 @@ namespace Kareem.Fluid.SPH
 
         void Cube(ref Fluid3D fluid3D)
         {
-            fluid3D.ParticleRadius = EditorGUILayout.FloatField("Particle Radius", fluid3D.ParticleRadius);
-            fluid3D.separationFactor = EditorGUILayout.FloatField("Sepreation Factor", fluid3D.separationFactor);
+            fluid3D.ParticleRadius = EditorGUILayout.FloatField(
+                "Particle Radius",
+                fluid3D.ParticleRadius
+            );
+            fluid3D.separationFactor = EditorGUILayout.FloatField(
+                "Sepreation Factor",
+                fluid3D.separationFactor
+            );
             EditorGUILayout.LabelField("Volume", fluid3D.Volume.ToString());
         }
     }

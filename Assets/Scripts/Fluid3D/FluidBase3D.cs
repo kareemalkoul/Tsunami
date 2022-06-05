@@ -46,10 +46,10 @@ namespace Kareem.Fluid.SPH
         [SerializeField]
         protected float tensionThreshold = 0.7f;
 
-        [SerializeField]
+        [SerializeField,HideInInspector]
         protected float tensionCoefficient = 0.0728f;
 
-        [SerializeField, Range(0.0f, 1.0f)]
+        [SerializeField, Range(0.0f, 1.0f),HideInInspector]
         protected float Damping = 0.0728f;
 
 

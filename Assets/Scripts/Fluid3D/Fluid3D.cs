@@ -93,21 +93,11 @@ namespace Kareem.Fluid.SPH
             float particleScale = 2 * particleRadius;
             volume = Mathf.Pow(particleScale, 3) * NumParticles * separationFactor;
 
-            // Debug.Log("volume; " + volume);
-            // Debug.Log("count: " + NumParticles);
-
             float sideLength = Mathf.Pow(volume, 1f / 3f);
             int sideCount = (int)Mathf.Pow(NumParticles, 1f / 3f);
             int extra = NumParticles - (int)Mathf.Pow(sideCount, 3);
 
-            // Debug.Log("sideLength: " + sideLength);
-            // Debug.Log("sideCount: " + sideCount);
-            // Debug.Log("extra: " + extra);
-
             float delta = (float)sideLength / (float)sideCount;
-
-            // Debug.Log("delta: " + delta);
-
 
             Vector3 origin = new Vector3(0, 0, 0); //new Vector3(-sideLength/2, 1.0f, -sideLength / 2);
             int n = 0;
@@ -124,7 +114,6 @@ namespace Kareem.Fluid.SPH
                             + Vector3.up * k * delta;
                         if (n >= NumParticles)
                             return;
-                        Debug.Log("particle " + n + " " + pos);
                         particles[n].Position = pos;
                         // particles[n].Position += Random.insideUnitSphere * 0.05f;
                         particles[n].Velocity = Vector3.zero;
@@ -133,7 +122,6 @@ namespace Kareem.Fluid.SPH
                 }
             }
 
-            Debug.Log("n: " + n);
         }
 
         /// <summary>
