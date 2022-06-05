@@ -13,7 +13,7 @@
 #define THREAD_SIZE_X 1024
 
 #define radius2 (_Smoothlen * _Smoothlen)
-
+ 
 int3 GetCell(float3 position)
 {
     return int3(position.x / CellSize, position.y / CellSize, position.z / CellSize);
