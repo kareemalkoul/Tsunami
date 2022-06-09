@@ -78,6 +78,14 @@ namespace Kareem.Fluid.SPH
         {
             get { return particlesBufferRead; }
         }
+        public ComputeBuffer ParticleDensitiesBuffer
+        {
+            get { return particleDensitiesBuffer; }
+        }
+        public ComputeBuffer ParticlesPressureBuffer
+        {
+            get { return particlesPressureBuffer; }
+        }
         #endregion
 
         #region Mono

@@ -20,6 +20,10 @@ namespace Kareem.Fluid.SPH
             RenderParticleMat.SetPass(0);
             RenderParticleMat.SetColor("_WaterColor", WaterColor);
             RenderParticleMat.SetBuffer("_ParticlesBuffer", solver.ParticlesBufferRead);
+            RenderParticleMat.SetBuffer("_ParticlesDensity", solver.ParticleDensitiesBuffer);
+            RenderParticleMat.SetBuffer("_ParticlesForce", solver.ParticlesPressureBuffer);
+         
+
             Graphics.DrawProceduralNow(MeshTopology.Points, solver.NumParticles);
         }
     }

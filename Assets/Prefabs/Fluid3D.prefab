@@ -58,11 +58,18 @@ MonoBehaviour:
   simulate: 1
   tensionThreshold: 0.7
   tensionCoefficient: 0.0728
+  Damping: 0.0728
+  dimensions: 200
+  maximumParticlesPerCell: 500
   fluidCS: {fileID: 7200000, guid: 458fbf94ee3b84a4abc12a2763464c81, type: 3}
-  ballRadius: 0.1
+  hashCS: {fileID: 0}
   MouseInteractionRadius: 1.5
+  createGameObject: 0
+  initParticleWay: 0
+  ballRadius: 0.1
   separationFactor: 1.4
   volume: 1
+  particleRadius: 0.15
 --- !u!114 &4507585079103403238
 MonoBehaviour:
   m_ObjectHideFlags: 0

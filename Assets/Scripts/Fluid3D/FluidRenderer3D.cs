@@ -1,20 +1,32 @@
 ﻿using UnityEngine;
 using System.Collections;
+using UnityEngine.Profiling;
 
 namespace Kareem.Fluid.SPH
 {
     [RequireComponent(typeof(Fluid3D))]
     public class FluidRenderer3D : MonoBehaviour
     {
+        private CustomSampler Rendering;
+        private CustomSampler GetDate;
+
         public Fluid3D solver;
         public Material RenderParticleMat;
         public Color WaterColor;
         public bool IsRenderInShader = true;
         public bool IsBoundsDrawed = true;
 
+        void Start()
+        {
+            Rendering = CustomSampler.Create("kareem/rendering");
+            GetDate = CustomSampler.Create("kareem/GetData");
+        }
+
         void OnRenderObject()
         {
+            Rendering.Begin();
             DrawParticle();
+            Rendering.End();
         }
 
         void DrawParticle()
@@ -24,8 +36,7 @@ namespace Kareem.Fluid.SPH
             RenderParticleMat.SetColor("_WaterColor", WaterColor);
             RenderParticleMat.SetBuffer("_ParticlesBuffer", solver.ParticlesBufferRead);
             // RenderParticleMat.SetFloat("_ParticleRadius", solver.BallRadius);
-            FluidParticle3D[] particles = new FluidParticle3D[solver.NumParticles];
-            solver.ParticlesBufferRead.GetData(particles);
+           
 
             if (IsRenderInShader)
             {
@@ -33,15 +44,19 @@ namespace Kareem.Fluid.SPH
             }
             else
             {
-                DrawByExtension(particles, radius);
+                DrawByExtension(radius);
             }
 
             if (IsBoundsDrawed)
                 DrawBounds();
         }
 
-        void DrawByExtension(FluidParticle3D[] particles, float radius)
+        void DrawByExtension(float radius)
         {
+            GetDate.Begin();
+            FluidParticle3D[] particles = new FluidParticle3D[solver.NumParticles];
+            solver.ParticlesBufferRead.GetData(particles);
+            GetDate.End();
             foreach (var item in particles)
             {
                 // Debug.Log(item.Position);
@@ -85,5 +100,7 @@ namespace Kareem.Fluid.SPH
             Debug.DrawLine(Start + EndYZ, Start + EndY, colorBoundry);
             Debug.DrawLine(Start + EndYZ, Start + EndZ, colorBoundry);
         }
+
+        
     }
 }

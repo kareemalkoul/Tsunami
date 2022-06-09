@@ -83,8 +83,6 @@ void ForceCS(uint3 DTid : SV_DispatchThreadID) {
 	float3 press = float3(0, 0, 0);
 	float3 visco = float3(0, 0, 0);
 	// float3 surfaceTension = float3(0, 0, 0);
-	ColorField temp;
-	ColorField color;
 	for (uint N_ID = 0; N_ID < (uint)_neighbourTracker[DTid.x]; N_ID++) {
 		  int neighbourIndex = _neighbourList[DTid.x * maximumParticlesPerCell * 8 + N_ID];
 
@@ -104,17 +102,12 @@ void ForceCS(uint3 DTid : SV_DispatchThreadID) {
 		// sticky item
 		visco += CalculateLapVelocity(r, P_velocity, N_velocity, N_density);
 
-		temp=CalculateSurfaceTension(r_sq,N_density,diff);
-		color.colorGradient+=temp.colorGradient;
-		color.colorLaplacian+=temp.colorLaplacian;
+
 	}
-	float3 colorGradient=color.colorGradient;
-	float madntiude=sqrt(colorGradient.x*colorGradient.x + colorGradient.y*colorGradient.y + colorGradient.z*colorGradient.z);
-	float3 tension=-_tensionCoefficient*color.colorLaplacian*color.colorGradient/madntiude;
-	tension=float3(0,0,0);
+	
 	
 	// Integration
-	float3 force = press + _Viscosity * visco + tension;
+	float3 force = press + _Viscosity * visco ;
 
 	// Acceleration buffer update
 	_ParticlesForceBufferWrite[P_ID].acceleration = force / P_density;
@@ -142,7 +135,7 @@ void IntegrateCS(uint3 DTid : SV_DispatchThreadID) {
 	// Here to write collision detection -----
 
 	// Wall boundary
-	acceleration=wallboundray(acceleration,position);
+	acceleration=penaltyWallboundray(acceleration,position);
 
 	// Gravity addition
 	//TODO:must _Gravity*_mass
