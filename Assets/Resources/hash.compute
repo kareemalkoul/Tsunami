@@ -36,7 +36,7 @@ void ClearHashGrid(uint3 id : SV_DispatchThreadID)
 void RecalculateHashGrid(uint3 id : SV_DispatchThreadID)
 {
     int previousCount = 0;
-    const int cellHash = Hash(GetCell(_ParticlesBufferRead[id.x].position));
+    const int cellHash = Hash(GetCell(_ParticlesBuffer[id.x].position));
     InterlockedAdd(_hashGridTracker[cellHash], 1, previousCount);
     if (previousCount >= maximumParticlesPerCell)
     {
@@ -49,6 +49,15 @@ void RecalculateHashGrid(uint3 id : SV_DispatchThreadID)
 void GetNearbyKeys(int3 originIndex, float3 position, out int nearbyKeys[8])
 {
     int3 nearbyBucketIndices[8];
+    /* 4 x
+       2 y
+       1 z
+        5 xz 
+        6 xy
+        3 yz
+         7 xyz
+         0 self
+    */
     for (int i = 0; i < 8; i++)
     {
         nearbyBucketIndices[i] = originIndex;
@@ -117,9 +126,9 @@ void GetNearbyKeys(int3 originIndex, float3 position, out int nearbyKeys[8])
 void BuildNeighbourList(uint3 id : SV_DispatchThreadID)
 {
     _neighbourTracker[id.x] = 0;
-    const int3 cell = GetCell(_ParticlesBufferRead[id.x].position);
+    const int3 cell = GetCell(_ParticlesBuffer[id.x].position);
     int cells[8];
-    GetNearbyKeys(cell, _ParticlesBufferRead[id.x].position, cells);
+    GetNearbyKeys(cell, _ParticlesBuffer[id.x].position, cells);
 
     for (uint j = 0; j < 8; j++)
     {
@@ -129,7 +138,7 @@ void BuildNeighbourList(uint3 id : SV_DispatchThreadID)
         {
             const uint potentialNeighbour = _hashGrid[cells[j] * maximumParticlesPerCell + index];
             if (potentialNeighbour == id.x) continue;
-            const float3 v = _ParticlesBufferRead[potentialNeighbour].position - _ParticlesBufferRead[id.x].position;
+            const float3 v = _ParticlesBuffer[potentialNeighbour].position - _ParticlesBuffer[id.x].position;
             if (dot(v, v) < radius2) // Use squared length (= dot) instead of length for performance.
             {
                 _neighbourList[id.x * maximumParticlesPerCell * 8 + _neighbourTracker[id.x]++] = potentialNeighbour;

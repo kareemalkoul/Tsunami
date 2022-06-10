@@ -12,10 +12,6 @@ namespace Kareem.Fluid.SPH
         float pressure;
     };
 
-    struct FluidParticleForces
-    {
-        public Vector2 Acceleration;
-    };
 
     struct FluidParticleForces3D
     {

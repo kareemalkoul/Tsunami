@@ -12,10 +12,6 @@ struct ParticleForces {
 	float3 acceleration;
 };
 
-struct ParticleForcesOld {
-	float3 acceleration;
-};
-
 struct ParticleDensity {
 	float density;
 };

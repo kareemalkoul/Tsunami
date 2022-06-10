@@ -5,7 +5,6 @@
 #include "collison_detection/wallBoundray.cginc"
 
 #pragma kernel DensityCS
-#pragma kernel PressureCS
 #pragma kernel ForceCS
 #pragma kernel IntegrateCS
 
@@ -24,43 +23,38 @@
 // ▼ Kernel function
 
 //--------------------------------------------------------------------------------------
-// Density calculation
+// Density andd pressure calculation
 //--------------------------------------------------------------------------------------
+
+void Pressure(uint P_ID) {
+
+	float  P_density = _ParticlesDensityBuffer[P_ID].density;	// Density calculated earlier
+	float  P_pressure = CalculatePressure(P_density);	// Pressure calculation
+
+	// Update pressure buffer
+	_ParticlesPressureBuffer[P_ID].pressure = P_pressure;
+}
 [numthreads(THREAD_SIZE_X, 1, 1)]
 void DensityCS(uint3 DTid : SV_DispatchThreadID) {
 	uint P_ID = DTid.x;	// Particle ID currently being processed
 
 	float h_sq = _Smoothlen * _Smoothlen;
-	float3 P_position = _ParticlesBufferRead[P_ID].position;
+	float3 P_position = _ParticlesBuffer[P_ID].position;
 
 	// TODO:convert To hash
 	// Neighborhood search(O(n^2))
 	float density = 0;
 	for (uint N_ID = 0; N_ID < (uint)_neighbourTracker[DTid.x]; N_ID++) {
   		int neighbourIndex = _neighbourList[DTid.x * maximumParticlesPerCell * 8 + N_ID];
-		float3 N_position = _ParticlesBufferRead[neighbourIndex].position;
+		float3 N_position = _ParticlesBuffer[neighbourIndex].position;
 		float3 diff = N_position - P_position;	// Particle distance
 		float r_sq = dot(diff, diff);			// Particle distance squared
 		density += CalculateDensity(r_sq);	// No need to take the route
 	}
 
 	// Update density buffer
-	_ParticlesDensityBufferWrite[P_ID].density = density;
-}
-
-
-//--------------------------------------------------------------------------------------
-// Pressure calculation ///  equation Tait
-//--------------------------------------------------------------------------------------
-[numthreads(THREAD_SIZE_X, 1, 1)]
-void PressureCS(uint3 DTid : SV_DispatchThreadID) {
-	uint P_ID = DTid.x;	// Particle ID currently being processed
-
-	float  P_density = _ParticlesDensityBufferRead[P_ID].density;	// Density calculated earlier
-	float  P_pressure = CalculatePressure(P_density);	// Pressure calculation
-
-	// Update pressure buffer
-	_ParticlesPressureBufferWrite[P_ID].pressure = P_pressure;
+	_ParticlesDensityBuffer[P_ID].density = density;
+	Pressure(P_ID);
 }
 
 
@@ -71,31 +65,28 @@ void PressureCS(uint3 DTid : SV_DispatchThreadID) {
 void ForceCS(uint3 DTid : SV_DispatchThreadID) {
 	uint P_ID = DTid.x; // Particle ID currently being processed
 
-	float3 P_position = _ParticlesBufferRead[P_ID].position;
-	float3 P_velocity = _ParticlesBufferRead[P_ID].velocity;
-	float  P_density = _ParticlesDensityBufferRead[P_ID].density;		// Density calculated earlier
-	float  P_pressure = _ParticlesPressureBufferRead[P_ID].pressure;	// The pressure calculated earlier
+	float3 P_position = _ParticlesBuffer[P_ID].position;
+	float3 P_velocity = _ParticlesBuffer[P_ID].velocity;
+	float  P_density = _ParticlesDensityBuffer[P_ID].density;		// Density calculated earlier
+	float  P_pressure = _ParticlesPressureBuffer[P_ID].pressure;	// The pressure calculated earlier
 
 	const float h_sq = _Smoothlen * _Smoothlen;
-	//N=j
-	//P=i
-	// Neighborhood search(O(n^2))
+
 	float3 press = float3(0, 0, 0);
 	float3 visco = float3(0, 0, 0);
-	// float3 surfaceTension = float3(0, 0, 0);
 	ColorField temp;
 	ColorField color;
 	for (uint N_ID = 0; N_ID < (uint)_neighbourTracker[DTid.x]; N_ID++) {
 		  int neighbourIndex = _neighbourList[DTid.x * maximumParticlesPerCell * 8 + N_ID];
 
-		float3 N_position = _ParticlesBufferRead[neighbourIndex].position;
+		float3 N_position = _ParticlesBuffer[neighbourIndex].position;
 
 		float3 diff = N_position - P_position;
 		float r_sq = dot(diff, diff);
 
-		float  N_density = _ParticlesDensityBufferRead[neighbourIndex].density;
-		float  N_pressure = _ParticlesPressureBufferRead[neighbourIndex].pressure;
-		float3 N_velocity = _ParticlesBufferRead[neighbourIndex].velocity;
+		float  N_density = _ParticlesDensityBuffer[neighbourIndex].density;
+		float  N_pressure = _ParticlesPressureBuffer[neighbourIndex].pressure;
+		float3 N_velocity = _ParticlesBuffer[neighbourIndex].velocity;
 		float  r = sqrt(r_sq);
 
 		// Pressure term
@@ -117,7 +108,7 @@ void ForceCS(uint3 DTid : SV_DispatchThreadID) {
 	float3 force = press + _Viscosity * visco + tension;
 
 	// Acceleration buffer update
-	_ParticlesForceBufferWrite[P_ID].acceleration = force / P_density;
+	_ParticlesForceBuffer[P_ID].acceleration = force / P_density;
 }
 
 //--------------------------------------------------------------------------------------
@@ -128,9 +119,9 @@ void IntegrateCS(uint3 DTid : SV_DispatchThreadID) {
 	const unsigned int P_ID = DTid.x; // Particle ID currently being processed
 
 	// Position and speed before update
-	float3 position = _ParticlesBufferRead[P_ID].position;
-	float3 velocity = _ParticlesBufferRead[P_ID].velocity;
-	float3 acceleration = _ParticlesForceBufferRead[P_ID].acceleration;	// Calculated acceleration
+	float3 position = _ParticlesBuffer[P_ID].position;
+	float3 velocity = _ParticlesBuffer[P_ID].velocity;
+	float3 acceleration = _ParticlesForceBuffer[P_ID].acceleration;	// Calculated acceleration
 
 	// if (distance(position, _MousePos.xy) < _MouseRadius && _MouseDown) {
 	// 	float3 dir = position - _MousePos.xy;
@@ -153,8 +144,8 @@ void IntegrateCS(uint3 DTid : SV_DispatchThreadID) {
 	position += _TimeStep * velocity;
 
 	// Particle buffer update
-	_ParticlesBufferWrite[P_ID].position = position;
-	_ParticlesBufferWrite[P_ID].velocity = velocity;
+	_ParticlesBuffer[P_ID].position = position;
+	_ParticlesBuffer[P_ID].velocity = velocity;
 }
 
 

@@ -22,10 +22,8 @@ namespace Kareem.Fluid.SPH
             float radius = 0.1f;
             RenderParticleMat.SetPass(0);
             RenderParticleMat.SetColor("_WaterColor", WaterColor);
-            RenderParticleMat.SetBuffer("_ParticlesBuffer", solver.ParticlesBufferRead);
+            RenderParticleMat.SetBuffer("_ParticlesBuffer", solver.ParticlesBuffer);
             // RenderParticleMat.SetFloat("_ParticleRadius", solver.BallRadius);
-            FluidParticle3D[] particles = new FluidParticle3D[solver.NumParticles];
-            solver.ParticlesBufferRead.GetData(particles);
 
             if (IsRenderInShader)
             {
@@ -33,15 +31,17 @@ namespace Kareem.Fluid.SPH
             }
             else
             {
-                DrawByExtension(particles, radius);
+                DrawByExtension(radius);
             }
 
             if (IsBoundsDrawed)
                 DrawBounds();
         }
 
-        void DrawByExtension(FluidParticle3D[] particles, float radius)
+        void DrawByExtension( float radius)
         {
+            FluidParticle3D[] particles = new FluidParticle3D[solver.NumParticles];
+            solver.ParticlesBuffer.GetData(particles);
             foreach (var item in particles)
             {
                 // Debug.Log(item.Position);
