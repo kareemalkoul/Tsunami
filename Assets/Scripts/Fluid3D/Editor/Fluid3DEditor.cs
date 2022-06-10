@@ -4,7 +4,6 @@ using UnityEditor;
 
 namespace Kareem.Fluid.SPH
 {
-
     //this class for make custom filed in monobehavoir
     [CustomEditor(typeof(Fluid3D), true)]
     public class Fluid3DEditor : Editor

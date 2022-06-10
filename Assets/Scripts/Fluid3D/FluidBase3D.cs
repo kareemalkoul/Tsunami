@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Runtime.InteropServices;
 using UnityEngine;
+using UnityEngine.Profiling;
 
 namespace Kareem.Fluid.SPH
 {
@@ -46,12 +47,11 @@ namespace Kareem.Fluid.SPH
         [SerializeField]
         protected float tensionThreshold = 0.7f;
 
-        [SerializeField,HideInInspector]
+        [SerializeField, HideInInspector]
         protected float tensionCoefficient = 0.0728f;
 
-        [SerializeField, Range(0.0f, 1.0f),HideInInspector]
+        [SerializeField, Range(0.0f, 1.0f), HideInInspector]
         protected float Damping = 0.0728f;
-
 
         private int numParticles; // Number of particles
         private float timeStep; // Time step width
@@ -64,7 +64,8 @@ namespace Kareem.Fluid.SPH
 
         #region hashVars
         [SerializeField]
-        public int dimensions = 200 ;
+        public int dimensions = 200;
+
         [SerializeField]
         public int maximumParticlesPerCell = 500;
 
@@ -72,6 +73,7 @@ namespace Kareem.Fluid.SPH
         #region DirectCompute
         [SerializeField]
         ComputeShader fluidCS;
+
         [SerializeField]
         ComputeShader hashCS;
         private static readonly int THREAD_SIZE_X = 1024; // Number of threads on the compute shader side
@@ -84,7 +86,15 @@ namespace Kareem.Fluid.SPH
         private ComputeBuffer HashGridBuffer;
         private ComputeBuffer HashGridTrackerBuffer;
         #endregion
+        #region Profiling
+        private CustomSampler HashProfiling;
+        private CustomSampler DesnsityProfiling;
 
+        private CustomSampler PressureProfiling;
+        private CustomSampler ForceProfiling;
+        private CustomSampler IntegrateProfiling;
+
+        #endregion
         #region Accessor
         public int NumParticles
         {
@@ -112,6 +122,7 @@ namespace Kareem.Fluid.SPH
         protected virtual void Start()
         {
             InitBuffers();
+            InitProfilling();
         }
 
         private void Update()
@@ -137,7 +148,7 @@ namespace Kareem.Fluid.SPH
             lapTensionCoef = particleMass * -945 / (32 * Mathf.PI * Mathf.Pow(smoothlen, 9)); // Poly6 for 3D
             oddStep = !oddStep;
             // Transfer of shader constants
-            
+
             setValues(fluidCS);
             setValues(hashCS);
             AdditionalCSParams(fluidCS);
@@ -148,7 +159,9 @@ namespace Kareem.Fluid.SPH
                 RunFluidSolver();
             }
         }
-        private void setValues(ComputeShader shader){
+
+        private void setValues(ComputeShader shader)
+        {
             shader.SetInt("_NumParticles", numParticles);
             shader.SetFloat("_TimeStep", timeStep);
             shader.SetFloat("_Smoothlen", smoothlen);
@@ -196,9 +209,11 @@ namespace Kareem.Fluid.SPH
             //if 1K particles then 1 for each thread ,2 for 2k and 4 for 4k ,...etc.because the numParticles n*1.024 and the size_x is 1024
             int threadGroupsX = numParticles / THREAD_SIZE_X;
 
+            //init hash
+            HashProfiling.Begin();
             kernelID = hashCS.FindKernel("ClearHashGrid");
             hashCS.SetBuffer(kernelID, "_hashGridTracker", HashGridTrackerBuffer);
-            hashCS.Dispatch(kernelID,  dimensions * dimensions * dimensions / THREAD_SIZE_X, 1, 1);
+            hashCS.Dispatch(kernelID, dimensions * dimensions * dimensions / THREAD_SIZE_X, 1, 1);
 
             kernelID = hashCS.FindKernel("RecalculateHashGrid");
             hashCS.SetBuffer(kernelID, "_ParticlesBuffer", particlesBuffer);
@@ -213,8 +228,10 @@ namespace Kareem.Fluid.SPH
             hashCS.SetBuffer(kernelID, "_neighbourList", NeighbourListBuffer);
             hashCS.SetBuffer(kernelID, "_neighbourTracker", NeighbourTrackerBuffer);
             hashCS.Dispatch(kernelID, threadGroupsX, 1, 1);
+            HashProfiling.End();
 
-            // Density & Pressure
+            // Density
+            DesnsityProfiling.Begin();
             kernelID = fluidCS.FindKernel("DensityCS");
             fluidCS.SetBuffer(kernelID, "_neighbourTracker", NeighbourTrackerBuffer);
             fluidCS.SetBuffer(kernelID, "_neighbourList", NeighbourListBuffer);
@@ -223,8 +240,10 @@ namespace Kareem.Fluid.SPH
             fluidCS.SetBuffer(kernelID, "_ParticlesDensityBuffer", particleDensitiesBuffer);
             fluidCS.SetBuffer(kernelID, "_ParticlesPressureBuffer", particlesPressureBuffer);
             fluidCS.Dispatch(kernelID, threadGroupsX, 1, 1);
+            PressureProfiling.End();
 
             // Force
+            ForceProfiling.Begin();
             kernelID = fluidCS.FindKernel("ForceCS");
             fluidCS.SetBuffer(kernelID, "_neighbourTracker", NeighbourTrackerBuffer);
             fluidCS.SetBuffer(kernelID, "_neighbourList", NeighbourListBuffer);
@@ -234,8 +253,10 @@ namespace Kareem.Fluid.SPH
             fluidCS.SetBuffer(kernelID, "_ParticlesPressureBuffer", particlesPressureBuffer);
             fluidCS.SetBuffer(kernelID, "_ParticlesForceBuffer", particleForcesBuffer);
             fluidCS.Dispatch(kernelID, threadGroupsX, 1, 1);
+            ForceProfiling.End();
 
             // Integrate
+            IntegrateProfiling.Begin();
             kernelID = fluidCS.FindKernel("IntegrateCS");
             fluidCS.SetBuffer(kernelID, "_ParticlesBuffer", particlesBuffer);
             fluidCS.SetBuffer(kernelID, "_ParticlesForceBuffer", particleForcesBuffer);
@@ -256,7 +277,6 @@ namespace Kareem.Fluid.SPH
         /// <param name="particles"></param>
         protected abstract void InitParticleData(ref T[] particles);
 
-
         protected void Init()
         {
             if (fluidCS == null)
@@ -265,6 +285,7 @@ namespace Kareem.Fluid.SPH
                 hashCS = (ComputeShader)Resources.Load("hash.compute");
             numParticles = (int)particleNum;
         }
+
         /// <summary>
         /// Buffer initialization
         /// </summary>
@@ -325,6 +346,15 @@ namespace Kareem.Fluid.SPH
             DeleteBuffer(NeighbourTrackerBuffer);
             DeleteBuffer(HashGridBuffer);
             DeleteBuffer(HashGridTrackerBuffer);
+        }
+
+        protected void InitProfilling()
+        {
+            HashProfiling = CustomSampler.Create("kareem/Hash");
+            DesnsityProfiling = CustomSampler.Create("kareem/Desnsity");
+            PressureProfiling = CustomSampler.Create("kareem/Pressure");
+            ForceProfiling = CustomSampler.Create("kareem/Force");
+            IntegrateProfiling = CustomSampler.Create("kareem/Integrate");
         }
     }
 }

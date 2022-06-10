@@ -1,6 +1,6 @@
 // Wall boundary 
 // (penalty method)
-float3 wallboundray(float3 acceleration,float3 position){
+float3 penaltyWallboundray(float3 acceleration,float3 position){
 	// Wall boundary (penalty method)
 	float dist;
 	//x in 0
