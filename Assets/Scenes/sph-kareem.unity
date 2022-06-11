@@ -11621,7 +11621,7 @@ MonoBehaviour:
   Iterations: {fileID: 122221575}
   GravityX: {fileID: 2055075553}
   GravityY: {fileID: 1109348603}
-  Gravityz: {fileID: 1706111948}
+  GravityZ: {fileID: 1706111948}
   RangeX: {fileID: 848584261}
   RangeY: {fileID: 908867442}
   RangeZ: {fileID: 844640180}

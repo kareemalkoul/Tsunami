@@ -15,7 +15,6 @@ public class PauseMenu : MonoBehaviour
     public GameObject[] OtherUiElements;
     private bool start = false;
     public Text Ruseme_Start;
- 
 
     [SerializeField]
     public Fluid3D fluid;
@@ -35,7 +34,7 @@ public class PauseMenu : MonoBehaviour
         Iterations.text = fluid.iterations.ToString();
         GravityX.text = fluid.gravity.x.ToString();
         GravityY.text = fluid.gravity.y.ToString();
-        Gravityz.text = fluid.gravity.z.ToString();
+        GravityZ.text = fluid.gravity.z.ToString();
         RangeX.text = fluid.range.x.ToString();
         RangeY.text = fluid.range.y.ToString();
         RangeZ.text = fluid.range.z.ToString();
@@ -59,8 +58,8 @@ public class PauseMenu : MonoBehaviour
         //     Menu.SetActive(false);
         //     SetActiveForElment(true);
         // }
-        
-    
+
+
         if (!start)
             return;
 
@@ -199,7 +198,7 @@ public class PauseMenu : MonoBehaviour
     public InputField Iterations;
     public InputField GravityX;
     public InputField GravityY;
-    public InputField Gravityz;
+    public InputField GravityZ;
     public InputField RangeX;
     public InputField RangeY;
     public InputField RangeZ;
@@ -208,6 +207,101 @@ public class PauseMenu : MonoBehaviour
     public InputField SphereRaduis;
     public InputField ParticleRaduis;
     public InputField SperationFactor;
+
+    public void SmoothelnField(String input)
+    {
+        fluid.Smootheln=float. Parse(input);
+    }
+
+    public void PressureField(String input)
+    {
+        fluid.pressureStiffness=float. Parse(input);
+    }
+
+    public void RestDenstiyField(String input)
+    {
+        fluid.restDensity=float. Parse(input);
+    }
+
+    public void ParticleMassField(String input)
+    {
+        fluid.particleMass=float. Parse(input);
+    }
+
+    public void ViscosityField(String input)
+    {
+        fluid.viscosity=float. Parse(input);
+    }
+
+    public void MaxDeltaTimeField(String input)
+    {
+        fluid.maxAllowableTimestep=float. Parse(input);
+    }
+
+    public void WallStiffnessField(String input)
+    {
+        fluid.wallStiffness=float. Parse(input);
+    }
+
+    public void IterationsField(String input)
+    {
+        fluid.iterations=int. Parse(input);
+    }
+
+    public void GravityXField(String input)
+    {
+        fluid.gravity.x=float. Parse(input);
+    }
+
+    public void GravityYField(String input)
+    {
+        fluid.gravity.y=float. Parse(input);
+    }
+
+    public void GravityZField(String input)
+    {
+        fluid.gravity.z=float. Parse(input);
+    }
+
+    public void RangeXField(String input)
+    {
+        fluid.range.x=float. Parse(input);
+    }
+
+    public void RangeYField(String input)
+    {
+        fluid.range.y=float. Parse(input);
+    }
+
+    public void RangeZField(String input)
+    {
+        fluid.range.z=float. Parse(input);
+    }
+
+    public void DimensionsField(String input)
+    {
+        fluid.dimensions=int. Parse(input);
+    }
+
+    public void MaxParticlesField(String input)
+    {
+        fluid.maximumParticlesPerCell=int. Parse(input);
+    }
+
+    public void SphereRaduisField(String input)
+    {
+        fluid.ballRadius=float. Parse(input);
+    }
+
+    public void ParticleRaduisField(String input)
+    {
+        fluid.particleRadius=float. Parse(input);
+    }
+
+    public void SperationFactorField(String input)
+    {
+        fluid.separationFactor=float. Parse(input);
+    }
 
     #endregion
 }
