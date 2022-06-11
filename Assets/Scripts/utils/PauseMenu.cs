@@ -9,6 +9,13 @@ public class PauseMenu : MonoBehaviour
 {
     public GameObject Menu;
     public Dropdown particles;
+    public Dropdown Method;
+    public GameObject CubeMethod;
+    public GameObject SphereMethod;
+    public GameObject[] OtherUiElements;
+    private bool start = false;
+    public Text Ruseme_Start;
+ 
 
     [SerializeField]
     public Fluid3D fluid;
@@ -16,7 +23,8 @@ public class PauseMenu : MonoBehaviour
     // Start is called before the first frame update
     private void Start()
     {
-        PopulateDropDownWithEnum(particles, fluid.ParticleNum);
+        DropDwonWithParticlesEnum(particles, fluid.ParticleNum);
+        DropDwonWithInitEnum(Method, fluid.initParticleWay);
         Smootheln.text = fluid.Smootheln.ToString();
         Pressure.text = fluid.pressureStiffness.ToString();
         RestDenstiy.text = fluid.restDensity.ToString();
@@ -41,43 +49,28 @@ public class PauseMenu : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        if (Input.GetKeyDown(KeyCode.Escape) && Menu.active == false)
-        {
-            Menu.SetActive(true);
+        // if (Input.GetKeyDown(KeyCode.Escape) && Menu.active == false)
+        // {
+        //     Menu.SetActive(true);
+        //     SetActiveForElment(false);
+        // }
+        // else if (Input.GetKeyDown(KeyCode.Escape) && Menu.active == true)
+        // {
+        //     Menu.SetActive(false);
+        //     SetActiveForElment(true);
+        // }
+        
+    
+        if (!start)
+            return;
 
-            // UiEventSystem.SetSelectedGameObject(DefualtSelectedMain);
-            // MainPanel.SetActive(true);
-            // VidPanel.SetActive(false);
-            // AudioPanel.SetActive(false);
-            // TitleTexts.SetActive(true);
-            // Mask.SetActive(true);
-            // Time.timeScale = 0;
-            // for (int i = 0; i < OtherUiElements.Length; i++)
-            // {
-            //     OtherUiElements[i].gameObject.SetActive(false);
-            // }
-            /* if (blurBool == false)
-              {
-                 blurEffect.enabled = true;
-             }  */
-        }
-        else if (Input.GetKeyDown(KeyCode.Escape) && Menu.active == true)
+        if (Input.GetKeyDown(KeyCode.Escape))
         {
-            Menu.SetActive(false);
-            // Time.timeScale = TimeScale;
-            // MainPanel.SetActive(false);
-            // VidPanel.SetActive(false);
-            // AudioPanel.SetActive(false);
-            // TitleTexts.SetActive(false);
-            // Mask.SetActive(false);
-            // for (int i = 0; i < OtherUiElements.Length; i++)
-            // {
-            //     OtherUiElements[i].gameObject.SetActive(true);
-            // }
+            ChangeGameState();
         }
     }
 
-    public void PopulateDropDownWithEnum(Dropdown dropdown, Enum targetEnum) //You can populate any dropdown with any enum with this method
+    public void DropDwonWithParticlesEnum(Dropdown dropdown, Enum targetEnum) //You can populate any dropdown with any enum with this method
     {
         Type enumType = targetEnum.GetType(); //Type of enum(FormatPresetType in my example)
         List<Dropdown.OptionData> newOptions = new List<Dropdown.OptionData>();
@@ -101,50 +94,84 @@ public class PauseMenu : MonoBehaviour
         );
     }
 
+    public void DropDwonWithInitEnum(Dropdown dropdown, Enum targetEnum) //You can populate any dropdown with any enum with this method
+    {
+        Type enumType = targetEnum.GetType(); //Type of enum(FormatPresetType in my example)
+        List<Dropdown.OptionData> newOptions = new List<Dropdown.OptionData>();
+        string[] enums = Enum.GetNames(enumType);
+        for (int i = 0; i < enums.Length; i++) //Populate new Options
+        {
+            string name = enums[i];
+            newOptions.Add(new Dropdown.OptionData(name));
+        }
+
+        dropdown.ClearOptions(); //Clear old options
+        dropdown.AddOptions(newOptions); //Add new options
+        dropdown.onValueChanged.AddListener(
+            delegate
+            {
+                InitParticleWay init = (InitParticleWay)
+                    Enum.GetValues(enumType).GetValue(dropdown.value);
+
+                fluid.initParticleWay = init;
+                switch (init)
+                {
+                    case InitParticleWay.CUBE:
+                        CubeMethod.SetActive(true);
+                        SphereMethod.SetActive(false);
+                        break;
+                    case InitParticleWay.SPHERE:
+                        CubeMethod.SetActive(false);
+                        SphereMethod.SetActive(true);
+
+                        break;
+                }
+            }
+        );
+    }
+
+    ///
+    ///this function convert from active game to inactive and the reverse.
+    void ChangeGameState()
+    {
+        SetActiveForElment(Menu.active);
+        Menu.SetActive(!Menu.active);
+    }
+
+    void SetActiveForElment(bool active)
+    {
+        foreach (GameObject gameobj in OtherUiElements)
+        {
+            gameobj.SetActive(active);
+        }
+    }
+
     #region ClickFunction
 
     public void Resume()
     {
-        if ( Menu.active == false)
+        if (!start)
         {
-            Menu.SetActive(true);
+            //the start button is pressed
+            Ruseme_Start.text = "Ruseme";
+            start = true;
+            ChangeGameState();
+            return;
+        }
 
-            // UiEventSystem.SetSelectedGameObject(DefualtSelectedMain);
-            // MainPanel.SetActive(true);
-            // VidPanel.SetActive(false);
-            // AudioPanel.SetActive(false);
-            // TitleTexts.SetActive(true);
-            // Mask.SetActive(true);
-            // Time.timeScale = 0;
-            // for (int i = 0; i < OtherUiElements.Length; i++)
-            // {
-            //     OtherUiElements[i].gameObject.SetActive(false);
-            // }
-            /* if (blurBool == false)
-              {
-                 blurEffect.enabled = true;
-             }  */
-        }
-        else if ( Menu.active == true)
+        //the ruseme button is pressed
+
+        if (Menu.active == false)
         {
-            Menu.SetActive(false);
-            // Time.timeScale = TimeScale;
-            // MainPanel.SetActive(false);
-            // VidPanel.SetActive(false);
-            // AudioPanel.SetActive(false);
-            // TitleTexts.SetActive(false);
-            // Mask.SetActive(false);
-            // for (int i = 0; i < OtherUiElements.Length; i++)
-            // {
-            //     OtherUiElements[i].gameObject.SetActive(true);
-            // }
+            ChangeGameState();
         }
-        //resume action before stop
-        //    for (int i = 0; i < OtherUiElements.Length; i++)
-        // {
-        //     OtherUiElements[i].gameObject.SetActive(true);
-        // }
+        else if (Menu.active == true)
+        {
+            ChangeGameState();
+        }
     }
+
+    public void Startbutton() { }
 
     public void Quit()
     {

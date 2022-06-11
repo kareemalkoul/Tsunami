@@ -310,6 +310,7 @@ Transform:
   m_LocalPosition: {x: -84.87786, y: 37.624573, z: -364.1525}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children:
+  - {fileID: 1012368379}
   - {fileID: 1816442257}
   - {fileID: 1112008680}
   m_Father: {fileID: 0}
@@ -4251,7 +4252,7 @@ MonoBehaviour:
   m_CorrespondingSourceObject: {fileID: 3940404416909209042, guid: 9571e6baab469384e9372a4150288837, type: 3}
   m_PrefabInstance: {fileID: 290322313}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 0}
+  m_GameObject: {fileID: 2019692923}
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 11e40a4745301fb42be13df8e8ca4ad6, type: 3}
@@ -7357,6 +7358,50 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1003995778}
   m_CullTransparentMesh: 1
+--- !u!1 &1012368378
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1012368379}
+  - component: {fileID: 1012368380}
+  m_Layer: 0
+  m_Name: FPSCounter
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 0
+--- !u!4 &1012368379
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1012368378}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_Children: []
+  m_Father: {fileID: 58650708}
+  m_RootOrder: 0
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1012368380
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1012368378}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0f28bd85c54a9e544bb4c4f280b26457, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  updateInterval: 0.5
 --- !u!1 &1013645936
 GameObject:
   m_ObjectHideFlags: 0
@@ -7818,7 +7863,7 @@ RectTransform:
   m_Children:
   - {fileID: 1115475682}
   m_Father: {fileID: 58650708}
-  m_RootOrder: 1
+  m_RootOrder: 2
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 0, y: 0}
@@ -8252,7 +8297,7 @@ GameObject:
   - component: {fileID: 1153085229}
   - component: {fileID: 1153085228}
   m_Layer: 0
-  m_Name: Ruseme
+  m_Name: Ruseme/Start
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -10217,7 +10262,7 @@ GameObject:
   - component: {fileID: 1559276854}
   - component: {fileID: 1559276853}
   m_Layer: 0
-  m_Name: Text
+  m_Name: Ruseme/Start
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -10275,7 +10320,7 @@ MonoBehaviour:
     m_HorizontalOverflow: 0
     m_VerticalOverflow: 0
     m_LineSpacing: 1
-  m_Text: Ruseme
+  m_Text: Start
 --- !u!222 &1559276854
 CanvasRenderer:
   m_ObjectHideFlags: 0
@@ -11542,7 +11587,7 @@ Transform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 58650708}
-  m_RootOrder: 0
+  m_RootOrder: 1
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &1816442258
 MonoBehaviour:
@@ -11558,6 +11603,13 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   Menu: {fileID: 1112008679}
   particles: {fileID: 1003995781}
+  Method: {fileID: 2123163097}
+  CubeMethod: {fileID: 905334382}
+  SphereMethod: {fileID: 70193451}
+  OtherUiElements:
+  - {fileID: 2019692923}
+  - {fileID: 1012368378}
+  Ruseme_Start: {fileID: 1559276853}
   fluid: {fileID: 590183925}
   Smootheln: {fileID: 511250234}
   Pressure: {fileID: 87960587}
@@ -12803,6 +12855,11 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 2009633979}
   m_CullTransparentMesh: 1
+--- !u!1 &2019692923 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 361318686889559020, guid: 9571e6baab469384e9372a4150288837, type: 3}
+  m_PrefabInstance: {fileID: 290322313}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1 &2055075551
 GameObject:
   m_ObjectHideFlags: 0
