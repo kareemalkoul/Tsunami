@@ -36,7 +36,7 @@ namespace Kareem.Fluid.SPH
         [HideInInspector, SerializeField]
         private float volume = 1;
 
-       
+
         ///finish Hide Fields
         ///
 
@@ -54,11 +54,11 @@ namespace Kareem.Fluid.SPH
                     initSphereMethod(ref particles);
                     break;
                 case InitParticleWay.CUBE:
-                    initCubeMethod2(ref particles,range);
+                    initCubeMethod(ref particles);
                     break;
             }
 
-          
+
         }
 
         void initSphereMethod(ref FluidParticle3D[] particles)
@@ -69,19 +69,19 @@ namespace Kareem.Fluid.SPH
                 particles[i].Position = range / 2f + Random.insideUnitSphere * ballRadius; // Initialize particles into a sphere
             }
         }
-
         void initCubeMethod(ref FluidParticle3D[] particles)
         {
             float particleScale = 2 * particleRadius;
             volume = Mathf.Pow(particleScale, 3) * NumParticles * separationFactor;
 
-            float sideLength = Mathf.Pow(volume, 1f / 7f);
-            int sideCount = (int)Mathf.Pow(NumParticles, 1f / 7f);
-            int extra = NumParticles - (int)Mathf.Pow(sideCount, 3);
+            float sideLength = Mathf.Pow(volume, 1f / 5f);
+            int sideCount = Mathf.CeilToInt(Mathf.Pow(NumParticles, 1f / 5f));
+            int extra = NumParticles - (int)Mathf.Pow(sideCount, 5);
 
+            Debug.Log("extra is: " + extra);
             float delta = (float)sideLength / (float)sideCount;
-            delta /= 2.5f;
-            float s = sideCount * sideCount * sideCount;
+            delta /= 2f;
+            float s = sideCount * sideCount;
 
             Vector3 origin = new Vector3(0, 0, 0); //new Vector3(-sideLength/2, 1.0f, -sideLength / 2);
             int n = 0;
@@ -106,26 +106,30 @@ namespace Kareem.Fluid.SPH
             }
 
         }
-        void initCubeMethod2(ref FluidParticle3D[] particles,Vector3 range){
-            int x =0;
-            int y = 0;
-            int z = 0;
-            for(int i = 0 ; i < NumParticles;i++){
-                if(x*2*particleRadius>range.x){
+        void initCubeMethod2(ref FluidParticle3D[] particles, Vector3 range)
+        {
+            float x = 0;
+            float y = 0;
+            float z = 0;
+            for (int i = 0; i < NumParticles; i++)
+            {
+                if (x * 2 * particleRadius > range.x)
+                {
                     x = 0;
-                    y = y+1;
-                    if(y*2*particleRadius > range.y){
-                        y=0;
-                        z = (z+1)%(int)range.z;
+                    z = z + 1;
+                    if (z * 2 * particleRadius > range.z)
+                    {
+                        z = 0;
+                        y = (y + 1) % (int)range.y;
                     }
                 }
 
-                Vector3 pos = new Vector3(x*2*particleRadius ,y*2*particleRadius ,z*2*particleRadius );
+                Vector3 pos = new Vector3(x * 2 * particleRadius, y * 2 * particleRadius, z * 2 * particleRadius);
                 particles[i].Position = pos;
-            //    Debug.Log(pos.x+" "+pos.y+" "+pos.z);
+                //    Debug.Log(pos.x+" "+pos.y+" "+pos.z);
                 x++;
             }
-            
+
         }
 
         /// <summary>
