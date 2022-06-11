@@ -63,19 +63,19 @@ namespace Kareem.Fluid.SPH
                 particles[i].Position = range / 2f + Random.insideUnitSphere * ballRadius; // Initialize particles into a sphere
             }
         }
-
         void initCubeMethod(ref FluidParticle3D[] particles)
         {
             float particleScale = 2 * particleRadius;
             volume = Mathf.Pow(particleScale, 3) * NumParticles * separationFactor;
 
-            float sideLength = Mathf.Pow(volume, 1f / 7f);
-            int sideCount = (int)Mathf.Pow(NumParticles, 1f / 7f);
-            int extra = NumParticles - (int)Mathf.Pow(sideCount, 3);
+            float sideLength = Mathf.Pow(volume, 1f / 5f);
+            int sideCount = Mathf.CeilToInt(Mathf.Pow(NumParticles, 1f / 5f));
+            int extra = NumParticles - (int)Mathf.Pow(sideCount, 5);
 
+            Debug.Log("extra is: " + extra);
             float delta = (float)sideLength / (float)sideCount;
-            delta /= 2.5f;
-            float s = sideCount * sideCount * sideCount;
+            delta /= 2f;
+            float s = sideCount * sideCount;
 
             Vector3 origin = new Vector3(0, 0, 0); //new Vector3(-sideLength/2, 1.0f, -sideLength / 2);
             int n = 0;
