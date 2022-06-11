@@ -21,7 +21,7 @@ int3 GetCell(float3 position)
 
 int Hash(int3 cell)
 {
-    return cell.x + Dimensions * (cell.y + Dimensions * cell.z);
+    return (uint)(cell.x + Dimensions * (cell.y + Dimensions * cell.z));//%(Dimensions*Dimensions*Dimensions);
 }
 
 
@@ -145,5 +145,4 @@ void BuildNeighbourList(uint3 id : SV_DispatchThreadID)
             }
         }
     }
-    // n. The Neighbouring-list should be n-particles big, each index containing a list of each particles neighbours in radius r.
 }

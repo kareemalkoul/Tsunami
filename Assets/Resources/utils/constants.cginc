@@ -28,5 +28,6 @@ cbuffer CB {
     float CellSize;
     int Dimensions;
     int maximumParticlesPerCell;
+	float particleRadius;
 };
 // ▲ Definition of shader constants -----------------------

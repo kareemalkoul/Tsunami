@@ -43,7 +43,7 @@ void DensityCS(uint3 DTid : SV_DispatchThreadID) {
 
 	// TODO:convert To hash
 	// Neighborhood search(O(n^2))
-	float density = 0;
+	float density = CalculateDensity(particleRadius);
 	for (uint N_ID = 0; N_ID < (uint)_neighbourTracker[DTid.x]; N_ID++) {
   		int neighbourIndex = _neighbourList[DTid.x * maximumParticlesPerCell * 8 + N_ID];
 		float3 N_position = _ParticlesBuffer[neighbourIndex].position;

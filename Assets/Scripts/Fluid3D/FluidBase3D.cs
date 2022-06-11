@@ -1,4 +1,5 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Runtime.InteropServices;
 using UnityEngine;
@@ -61,6 +62,9 @@ namespace Kareem.Fluid.SPH
         private float lapTensionCoef; // Tension coefficient of Laplacian kernel
         private float gradTensionCoef; // Tension coefficient of grad kernel
         private bool oddStep;
+        
+        [HideInInspector, SerializeField]
+        protected float particleRadius = 0.15f; // Radius for a particle
 
         #region hashVars
         [SerializeField]
@@ -184,6 +188,7 @@ namespace Kareem.Fluid.SPH
             shader.SetFloat("CellSize", smoothlen * 2);
             shader.SetInt("Dimensions", dimensions);
             shader.SetInt("maximumParticlesPerCell", maximumParticlesPerCell);
+            shader.SetFloat("particleRadius",particleRadius);
         }
 
         protected void OnDestroy()
@@ -208,7 +213,6 @@ namespace Kareem.Fluid.SPH
             // num of particle to each Thread
             //if 1K particles then 1 for each thread ,2 for 2k and 4 for 4k ,...etc.because the numParticles n*1.024 and the size_x is 1024
             int threadGroupsX = numParticles / THREAD_SIZE_X;
-
             //init hash
             HashProfiling.Begin();
             kernelID = hashCS.FindKernel("ClearHashGrid");
@@ -261,9 +265,21 @@ namespace Kareem.Fluid.SPH
             fluidCS.SetBuffer(kernelID, "_ParticlesBuffer", particlesBuffer);
             fluidCS.SetBuffer(kernelID, "_ParticlesForceBuffer", particleForcesBuffer);
             fluidCS.Dispatch(kernelID, threadGroupsX, 1, 1);
+           // Debug.Log("before print positions");
+          //  printPositions();
+          //  Debug.Log("after print positions");
 
         }
 
+        private void printPositions(){
+            FluidParticle3D[] particles = new FluidParticle3D[numParticles];
+            particlesBuffer.GetData(particles);
+            for(int i = 0 ; i < numParticles;i++){
+                if(Double.IsNaN(particles[i].Position.x)){
+                    Debug.Log("nan at "+i);
+                }
+            }
+        }
 
         /// <summary>
         /// Use this method if you want to add a transfer of shader constants in a child class
