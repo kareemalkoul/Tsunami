@@ -13,46 +13,46 @@ namespace Kareem.Fluid.SPH
         protected NumParticleEnum particleNum = NumParticleEnum.NUM_8K; // Number of particles
 
         [SerializeField]
-        protected float smoothlen = 0.012f; // Particle radius
+        public float smoothlen = 0.012f; // Particle radius
 
         [SerializeField]
-        private float pressureStiffness = 200.0f; // Pressure term coefficient
+        public float pressureStiffness = 200.0f; // Pressure term coefficient
 
         [SerializeField]
-        protected float restDensity = 1000.0f; // resting density
+        public float restDensity = 1000.0f; // resting density
 
         [SerializeField]
-        protected float particleMass = 0.0002f; // particle mass
+        public float particleMass = 0.0002f; // particle mass
 
         [SerializeField]
-        protected float viscosity = 0.1f; // Viscosity coefficient
+        public float viscosity = 0.1f; // Viscosity coefficient
 
         [SerializeField]
-        protected float maxAllowableTimestep = 0.005f; // Time step width
+        public float maxAllowableTimestep = 0.005f; // Time step width
 
         [SerializeField]
-        protected float wallStiffness = 3000.0f; // The power of the wall of penalty law
+        public float wallStiffness = 3000.0f; // The power of the wall of penalty law
 
         [SerializeField]
-        protected int iterations = 4; // Number of iterations per frame of simulation
+        public int iterations = 4; // Number of iterations per frame of simulation
 
         [SerializeField]
-        protected Vector3 gravity = new Vector3(0.0f, -0.5f, 0.0f); // gravity
+        public Vector3 gravity = new Vector3(0.0f, -0.5f, 0.0f); // gravity
 
         [SerializeField]
-        protected Vector3 range = new Vector3(1, 1, 1); // Simulation space
+        public Vector3 range = new Vector3(1, 1, 1); // Simulation space
 
         [SerializeField]
-        protected bool simulate = true; // Simulation execution or stop for a while
+        public bool simulate = true; // Simulation execution or stop for a while
 
         [SerializeField]
-        protected float tensionThreshold = 0.7f;
+        public float tensionThreshold = 0.7f;
 
         [SerializeField, HideInInspector]
-        protected float tensionCoefficient = 0.0728f;
+        public float tensionCoefficient = 0.0728f;
 
         [SerializeField, Range(0.0f, 1.0f), HideInInspector]
-        protected float Damping = 0.0728f;
+        public float Damping = 0.0728f;
 
         private int numParticles; // Number of particles
         private float timeStep; // Time step width
@@ -64,7 +64,7 @@ namespace Kareem.Fluid.SPH
         private bool oddStep;
         
         [HideInInspector, SerializeField]
-        protected float particleRadius = 0.15f; // Radius for a particle
+        public float particleRadius = 0.15f; // Radius for a particle
 
         #region hashVars
         [SerializeField]
@@ -244,7 +244,7 @@ namespace Kareem.Fluid.SPH
             fluidCS.SetBuffer(kernelID, "_ParticlesDensityBuffer", particleDensitiesBuffer);
             fluidCS.SetBuffer(kernelID, "_ParticlesPressureBuffer", particlesPressureBuffer);
             fluidCS.Dispatch(kernelID, threadGroupsX, 1, 1);
-            PressureProfiling.End();
+            DesnsityProfiling.End();
 
             // Force
             ForceProfiling.Begin();
@@ -265,6 +265,7 @@ namespace Kareem.Fluid.SPH
             fluidCS.SetBuffer(kernelID, "_ParticlesBuffer", particlesBuffer);
             fluidCS.SetBuffer(kernelID, "_ParticlesForceBuffer", particleForcesBuffer);
             fluidCS.Dispatch(kernelID, threadGroupsX, 1, 1);
+            IntegrateProfiling.End();
            // Debug.Log("before print positions");
           //  printPositions();
           //  Debug.Log("after print positions");

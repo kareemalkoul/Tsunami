@@ -13,11 +13,8 @@ namespace Kareem.Fluid.SPH
 
     public class Fluid3D : FluidBase3D<FluidParticle3D>
     {
-
-
         [SerializeField]
         private float MouseInteractionRadius = 1f; // Wide range of mouse interactions
-
 
         [SerializeField]
         public InitParticleWay initParticleWay = InitParticleWay.SPHERE;
@@ -28,7 +25,7 @@ namespace Kareem.Fluid.SPH
         ///
         ///Hide fields
         [HideInInspector, SerializeField]
-        private float ballRadius = 0.1f; // Circular radius at particle position initialization
+        public float ballRadius = 0.1f; // Circular radius at particle position initialization
 
         [HideInInspector, SerializeField]
         public float separationFactor = 1.4f;
@@ -36,7 +33,6 @@ namespace Kareem.Fluid.SPH
         [HideInInspector, SerializeField]
         private float volume = 1;
 
-       
         ///finish Hide Fields
         ///
 
@@ -54,11 +50,9 @@ namespace Kareem.Fluid.SPH
                     initSphereMethod(ref particles);
                     break;
                 case InitParticleWay.CUBE:
-                    initCubeMethod2(ref particles,range);
+                    initCubeMethod2(ref particles, range);
                     break;
             }
-
-          
         }
 
         void initSphereMethod(ref FluidParticle3D[] particles)
@@ -104,28 +98,35 @@ namespace Kareem.Fluid.SPH
                     }
                 }
             }
-
         }
-        void initCubeMethod2(ref FluidParticle3D[] particles,Vector3 range){
-            int x =0;
+
+        void initCubeMethod2(ref FluidParticle3D[] particles, Vector3 range)
+        {
+            int x = 0;
             int y = 0;
             int z = 0;
-            for(int i = 0 ; i < NumParticles;i++){
-                if(x*2*particleRadius>range.x){
+            for (int i = 0; i < NumParticles; i++)
+            {
+                if (x * 2 * particleRadius > range.x)
+                {
                     x = 0;
-                    y = y+1;
-                    if(y*2*particleRadius > range.y){
-                        y=0;
-                        z = (z+1)%(int)range.z;
+                    y = y + 1;
+                    if (y * 2 * particleRadius > range.y)
+                    {
+                        y = 0;
+                        z = (z + 1) % (int)range.z;
                     }
                 }
 
-                Vector3 pos = new Vector3(x*2*particleRadius ,y*2*particleRadius ,z*2*particleRadius );
+                Vector3 pos = new Vector3(
+                    x * 2 * particleRadius,
+                    y * 2 * particleRadius,
+                    z * 2 * particleRadius
+                );
                 particles[i].Position = pos;
-            //    Debug.Log(pos.x+" "+pos.y+" "+pos.z);
+                //    Debug.Log(pos.x+" "+pos.y+" "+pos.z);
                 x++;
             }
-            
         }
 
         /// <summary>
@@ -164,23 +165,7 @@ namespace Kareem.Fluid.SPH
             InitBuffers();
         }
 
-
-        [System.Obsolete]
-        public void OnGUI()
-        {
-            GUI.Box(new Rect(0, 0, 220, 420), "");
-
-            GUI.Label(new Rect(11, 0, 80, 20), "25");
-
-            if (GUI.Button(new Rect(10, 20, 200, 20), "Clear Particles")) { }
-            if (Input.GetKeyDown(KeyCode.R))
-            {
-                Application.LoadLevel(Application.loadedLevel);
-
-            }
-
-        }
-
+       
         public float BallRadius
         {
             get { return ballRadius; }
@@ -202,6 +187,24 @@ namespace Kareem.Fluid.SPH
         {
             get { return volume; }
             set { volume = value; }
+        }
+
+        public float Smootheln
+        {
+            get { return volume; }
+            set { volume = value; }
+        }
+
+        public NumParticleEnum ParticleNum
+        {
+            get { return particleNum; }
+            set { particleNum = value; }
+        }
+
+         public float PressureStiffness
+        {
+            get { return pressureStiffness; }
+            set { pressureStiffness = value; }
         }
     }
 }
