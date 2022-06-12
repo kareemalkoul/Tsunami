@@ -225,97 +225,97 @@ public class PauseMenu : MonoBehaviour
 
     public void SmoothelnField(String input)
     {
-        fluid.Smootheln = float.Parse(input);
+        fluid.Smootheln = float.Parse(Smootheln.text.Trim());
     }
 
     public void PressureField(String input)
     {
-        fluid.pressureStiffness = float.Parse(input);
+        fluid.pressureStiffness = float.Parse(Pressure.text.Trim());
     }
 
     public void RestDenstiyField(String input)
     {
-        fluid.restDensity = float.Parse(input);
+        fluid.restDensity = float.Parse(RestDenstiy.text.Trim());
     }
 
     public void ParticleMassField(String input)
     {
-        fluid.particleMass = float.Parse(input);
+        fluid.particleMass = float.Parse(ParticleMass.text.Trim());
     }
 
     public void ViscosityField(String input)
     {
-        fluid.viscosity = float.Parse(input);
+        fluid.viscosity = float.Parse(Viscosity.text.Trim());
     }
 
     public void MaxDeltaTimeField(String input)
     {
-        fluid.maxAllowableTimestep = float.Parse(input);
+        fluid.maxAllowableTimestep = float.Parse(MaxDeltaTime.text.Trim());
     }
 
     public void WallStiffnessField(String input)
     {
-        fluid.wallStiffness = float.Parse(input);
+        fluid.wallStiffness = float.Parse(WallStiffness.text.Trim());
     }
 
     public void IterationsField(String input)
     {
-        fluid.iterations = int.Parse(input);
+        fluid.iterations = int.Parse(Iterations.text.Trim());
     }
 
     public void GravityXField(String input)
     {
-        fluid.gravity.x = float.Parse(input);
+        fluid.gravity.x = float.Parse(GravityX.text.Trim());
     }
 
     public void GravityYField(String input)
     {
-        fluid.gravity.y = float.Parse(input);
+        fluid.gravity.y = float.Parse(GravityY.text.Trim());
     }
 
     public void GravityZField(String input)
     {
-        fluid.gravity.z = float.Parse(input);
+        fluid.gravity.z = float.Parse(GravityZ.text.Trim());
     }
 
     public void RangeXField(String input)
     {
-        fluid.range.x = float.Parse(input);
+        fluid.range.x = float.Parse(RangeX.text.Trim());
     }
 
     public void RangeYField(String input)
     {
-        fluid.range.y = float.Parse(input);
+        fluid.range.y = float.Parse(RangeY.text.Trim());
     }
 
     public void RangeZField(String input)
     {
-        fluid.range.z = float.Parse(input);
+        fluid.range.z = float.Parse(RangeZ.text.Trim());
     }
 
     public void DimensionsField(String input)
     {
-        fluid.dimensions = int.Parse(input);
+        fluid.dimensions = int.Parse(input.Trim());
     }
 
     public void MaxParticlesField(String input)
     {
-        fluid.maximumParticlesPerCell = int.Parse(input);
+        fluid.maximumParticlesPerCell = int.Parse(MaxParticles.text.Trim());
     }
 
     public void SphereRaduisField(String input)
     {
-        fluid.ballRadius = float.Parse(input);
+        fluid.ballRadius = float.Parse(SphereRaduis.text.Trim());
     }
 
     public void ParticleRaduisField(String input)
     {
-        fluid.particleRadius = float.Parse(input);
+        fluid.particleRadius = float.Parse(ParticleRaduis.text.Trim());
     }
 
     public void SperationFactorField(String input)
     {
-        fluid.separationFactor = float.Parse(input);
+        fluid.separationFactor = float.Parse(SperationFactor.text.Trim());
     }
 
     #endregion
