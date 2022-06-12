@@ -19,7 +19,7 @@ namespace Kareem.Fluid.SPH
 
             switch (fluid3D.initParticleWay)
             {
-                case InitParticleWay.SPHERE:
+                case InitParticleWay.TSUNAMI:
                     Sphere(ref fluid3D);
                     break;
                 case InitParticleWay.CUBE:

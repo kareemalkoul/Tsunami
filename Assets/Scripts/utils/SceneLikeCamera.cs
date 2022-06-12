@@ -4,6 +4,9 @@ namespace Kareem.Fluid.SPH
 {
     public class SceneLikeCamera : MonoBehaviour
     {
+        [SerializeField]
+        private GameObject camera ;
+
         [Header("Focus Object")]
         [SerializeField, Tooltip("Enable double-click to focus on objects?")]
         private bool doFocus = false;
@@ -125,10 +128,10 @@ namespace Kareem.Fluid.SPH
             //By far the simplest solution I could come up with for moving only on the Horizontal plane - no rotation, just cache y
             if (Input.GetKey(flatMoveKey))
             {
-                float origY = transform.position.y;
+                float origY = camera.transform.position.y;
 
-                transform.Translate(move);
-                transform.position = new Vector3(transform.position.x, origY, transform.position.z);
+                camera.transform.Translate(move);
+                camera.transform.position = new Vector3(camera.transform.position.x, origY, camera.transform.position.z);
 
                 return;
             }
@@ -146,19 +149,19 @@ namespace Kareem.Fluid.SPH
             //Rotate the camera when anchored
             if (Input.GetKey(anchoredRotateKey))
             {
-                transform.RotateAround(
-                    transform.position,
-                    transform.right,
+                camera.transform.RotateAround(
+                    camera.transform.position,
+                    camera.transform.right,
                     mouseMoveY * -rotationSpeed
                 );
-                transform.RotateAround(transform.position, Vector3.up, mouseMoveX * rotationSpeed);
+                camera.transform.RotateAround(camera.transform.position, Vector3.up, mouseMoveX * rotationSpeed);
             }
 
-            transform.Translate(move);
+            camera.transform.Translate(move);
 
             //Scroll to zoom
             float mouseScroll = Input.GetAxis(zoomAxis);
-            transform.Translate(Vector3.forward * mouseScroll * zoomSpeed);
+            camera.transform.Translate(Vector3.forward * mouseScroll * zoomSpeed);
         }
 
         private void FocusObject()
@@ -176,27 +179,27 @@ namespace Kareem.Fluid.SPH
                 Vector3 targetPos = target.transform.position;
                 Vector3 targetSize = hit.collider.bounds.size;
 
-                transform.position = targetPos + GetOffset(targetPos, targetSize);
+                camera.transform.position = targetPos + GetOffset(targetPos, targetSize);
 
-                transform.LookAt(target.transform);
+                camera.transform.LookAt(target.transform);
             }
         }
 
         private void SavePosAndRot()
         {
-            prevRot = transform.rotation;
-            prevPos = transform.position;
+            prevRot = camera.transform.rotation;
+            prevPos = camera.transform.position;
         }
 
         private void GoBackToLastPosition()
         {
-            transform.position = prevPos;
-            transform.rotation = prevRot;
+            camera.transform.position = prevPos;
+            camera.transform.rotation = prevRot;
         }
 
         private Vector3 GetOffset(Vector3 targetPos, Vector3 targetSize)
         {
-            Vector3 dirToTarget = targetPos - transform.position;
+            Vector3 dirToTarget = targetPos - camera.transform.position;
 
             float focusDistance = Mathf.Max(targetSize.x, targetSize.z);
             focusDistance = Mathf.Clamp(focusDistance, minFocusDistance, focusDistance);

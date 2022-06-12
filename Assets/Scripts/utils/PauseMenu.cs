@@ -41,9 +41,13 @@ public class PauseMenu : MonoBehaviour
         RangeZ.text = fluid.range.z.ToString();
         Dimensions.text = fluid.dimensions.ToString();
         MaxParticles.text = fluid.maximumParticlesPerCell.ToString();
-        SphereRaduis.text = fluid.ballRadius.ToString();
-        ParticleRaduis.text = fluid.particleRadius.ToString();
+        // SphereRaduis.text = fluid.ballRadius.ToString();
+        // ParticleRaduis.text = fluid.particleRadius.ToString();
+        TensionCoeffient.text = fluid.tensionCoefficient.ToString();
+        TensionThershold.text = fluid.tensionThreshold.ToString();
         SperationFactor.text = fluid.separationFactor.ToString();
+        SperationFactor.text = fluid.separationFactor.ToString();
+        MoveForce.text = fluid.moveForce.ToString();
     }
 
     // Update is called once per frame
@@ -70,6 +74,7 @@ public class PauseMenu : MonoBehaviour
         }
 
         Stop();
+        MoveWall();
     }
 
     public void DropDwonWithParticlesEnum(Dropdown dropdown, Enum targetEnum) //You can populate any dropdown with any enum with this method
@@ -116,18 +121,18 @@ public class PauseMenu : MonoBehaviour
                     Enum.GetValues(enumType).GetValue(dropdown.value);
 
                 fluid.initParticleWay = init;
-                switch (init)
-                {
-                    case InitParticleWay.CUBE:
-                        CubeMethod.SetActive(true);
-                        SphereMethod.SetActive(false);
-                        break;
-                    case InitParticleWay.SPHERE:
-                        CubeMethod.SetActive(false);
-                        SphereMethod.SetActive(true);
+                // switch (init)
+                // {
+                //     case InitParticleWay.CUBE:
+                //         CubeMethod.SetActive(true);
+                //         SphereMethod.SetActive(false);
+                //         break;
+                //     case InitParticleWay.SPHERE:
+                //         CubeMethod.SetActive(false);
+                //         SphereMethod.SetActive(true);
 
-                        break;
-                }
+                //         break;
+                // }
             }
         );
     }
@@ -199,6 +204,14 @@ public class PauseMenu : MonoBehaviour
             fluid.simulate = !fluid.simulate;
         }
     }
+
+    public void MoveWall()
+    {
+        if (Input.GetKeyDown(KeyCode.P))
+        {
+            fluid.MoveWall();
+        }
+    }
     //Ouput the new value of the Dropdown into Text
     #endregion
 
@@ -219,9 +232,13 @@ public class PauseMenu : MonoBehaviour
     public InputField RangeZ;
     public InputField Dimensions;
     public InputField MaxParticles;
-    public InputField SphereRaduis;
-    public InputField ParticleRaduis;
+    public InputField TensionCoeffient;
+    public InputField TensionThershold;
+
+    // public InputField SphereRaduis;
+    // public InputField ParticleRaduis;
     public InputField SperationFactor;
+    public InputField MoveForce;
 
     public void SmoothelnField(String input)
     {
@@ -303,19 +320,34 @@ public class PauseMenu : MonoBehaviour
         fluid.maximumParticlesPerCell = int.Parse(MaxParticles.text.Trim());
     }
 
-    public void SphereRaduisField(String input)
+    public void TensionCoeffientField(String input)
     {
-        fluid.ballRadius = float.Parse(SphereRaduis.text.Trim());
+        fluid.separationFactor = float.Parse(TensionCoeffient.text.Trim());
     }
 
-    public void ParticleRaduisField(String input)
+    public void TensionThersholdField(String input)
     {
-        fluid.particleRadius = float.Parse(ParticleRaduis.text.Trim());
+        fluid.separationFactor = float.Parse(TensionThershold.text.Trim());
     }
+
+    // public void SphereRaduisField(String input)
+    // {
+    //     fluid.ballRadius = float.Parse(SphereRaduis.text.Trim());
+    // }
+
+    // public void ParticleRaduisField(String input)
+    // {
+    //     fluid.particleRadius = float.Parse(ParticleRaduis.text.Trim());
+    // }
 
     public void SperationFactorField(String input)
     {
         fluid.separationFactor = float.Parse(SperationFactor.text.Trim());
+    }
+
+    public void MoveForceField(String input)
+    {
+        fluid.separationFactor = float.Parse(MoveForce.text.Trim());
     }
 
     #endregion

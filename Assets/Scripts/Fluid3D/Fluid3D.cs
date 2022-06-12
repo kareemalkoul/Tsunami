@@ -17,7 +17,7 @@ namespace Kareem.Fluid.SPH
         private float MouseInteractionRadius = 1f; // Wide range of mouse interactions
 
         [SerializeField]
-        public InitParticleWay initParticleWay = InitParticleWay.SPHERE;
+        public InitParticleWay initParticleWay = InitParticleWay.CUBE;
 
         private bool isMouseDown;
         private Vector3 screenToWorldPointPos;
@@ -33,10 +33,38 @@ namespace Kareem.Fluid.SPH
         [HideInInspector, SerializeField]
         private float volume = 1;
 
+        [HideInInspector, SerializeField]
+        public float moveForce = 0.08f;
+
         ///finish Hide Fields
         ///
 
+        public void MoveWall()
+        {
+            // if (addedForce)
+            // {
+            //     float x = 0.08f;
 
+            //     if (range.x <= rangeCompare.x - 2)
+            //     {
+            //         wave = false;
+            //     }
+            //     if (range.x >= rangeCompare.x)
+            //     {
+            //         //  range.x -= 0.03f;
+            //         addedForce = false;
+            //         wave = true;
+            //     }
+            //     if (range.x > rangeCompare.x - 2 && wave)
+            //     {
+            //         range.x -= x;
+            //     }
+            //     if (range.x < rangeCompare.x && !wave)
+            //     {
+            //         range.x += x;
+            //     }
+            // }
+        }
 
         /// <summary>
         /// Particle initial position setting
@@ -46,7 +74,7 @@ namespace Kareem.Fluid.SPH
         {
             switch (initParticleWay)
             {
-                case InitParticleWay.SPHERE:
+                case InitParticleWay.TSUNAMI:
                     initSphereMethod(ref particles);
                     break;
                 case InitParticleWay.CUBE:
@@ -63,6 +91,7 @@ namespace Kareem.Fluid.SPH
                 particles[i].Position = range / 2f + Random.insideUnitSphere * ballRadius; // Initialize particles into a sphere
             }
         }
+
         void initCubeMethod(ref FluidParticle3D[] particles)
         {
             float particleScale = 2 * particleRadius;
@@ -165,7 +194,6 @@ namespace Kareem.Fluid.SPH
             InitBuffers();
         }
 
-       
         public float BallRadius
         {
             get { return ballRadius; }
@@ -189,15 +217,13 @@ namespace Kareem.Fluid.SPH
             set { volume = value; }
         }
 
-      
-
         public NumParticleEnum ParticleNum
         {
             get { return particleNum; }
             set { particleNum = value; }
         }
 
-         public float PressureStiffness
+        public float PressureStiffness
         {
             get { return pressureStiffness; }
             set { pressureStiffness = value; }

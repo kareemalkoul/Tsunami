@@ -17,7 +17,7 @@ namespace Kareem.Fluid.SPH
 
     public enum InitParticleWay
     {
-        SPHERE = 0,
+        TSUNAMI = 0,
         CUBE = 1,
     }
 
@@ -27,8 +27,8 @@ namespace Kareem.Fluid.SPH
         {
             switch (me)
             {
-                case InitParticleWay.SPHERE:
-                    return "SPHERE";
+                case InitParticleWay.TSUNAMI:
+                    return "TSUNAMI";
                 case InitParticleWay.CUBE:
                     return "CUBE";
                 default:
