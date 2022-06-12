@@ -189,11 +189,7 @@ namespace Kareem.Fluid.SPH
             set { volume = value; }
         }
 
-        public float Smootheln
-        {
-            get { return volume; }
-            set { volume = value; }
-        }
+      
 
         public NumParticleEnum ParticleNum
         {

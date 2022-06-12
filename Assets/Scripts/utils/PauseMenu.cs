@@ -25,7 +25,7 @@ public class PauseMenu : MonoBehaviour
     {
         DropDwonWithParticlesEnum(particles, fluid.ParticleNum);
         DropDwonWithInitEnum(Method, fluid.initParticleWay);
-        Smootheln.text = fluid.Smootheln.ToString();
+        Smootheln.text = fluid.smoothlen.ToString();
         Pressure.text = fluid.pressureStiffness.ToString();
         RestDenstiy.text = fluid.restDensity.ToString();
         ParticleMass.text = fluid.particleMass.ToString();
@@ -225,7 +225,7 @@ public class PauseMenu : MonoBehaviour
 
     public void SmoothelnField(String input)
     {
-        fluid.Smootheln = float.Parse(Smootheln.text.Trim());
+        fluid.smoothlen = float.Parse(Smootheln.text.Trim());
     }
 
     public void PressureField(String input)

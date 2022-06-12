@@ -17,7 +17,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &361318686889559027
 Transform:
   m_ObjectHideFlags: 0
@@ -44,29 +44,29 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 11e40a4745301fb42be13df8e8ca4ad6, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  particleNum: 8192
+  particleNum: 32768
   smoothlen: 0.5
   pressureStiffness: 0.57
   restDensity: 4
   particleMass: 0.08
   viscosity: 3
-  maxAllowableTimestep: 0.0004166667
+  maxAllowableTimestep: 0.004166667
   wallStiffness: 3000
-  iterations: 4
+  iterations: 1
   gravity: {x: 0, y: -10, z: 0}
-  range: {x: 10, y: 9, z: 10}
+  range: {x: 20, y: 20, z: 20}
   simulate: 1
   tensionThreshold: 0.7
   tensionCoefficient: 0.0728
   Damping: 0.0728
-  particleRadius: 0.15
-  dimensions: 200
+  particleRadius: 0.1
+  dimensions: 100
   maximumParticlesPerCell: 500
   fluidCS: {fileID: 7200000, guid: 458fbf94ee3b84a4abc12a2763464c81, type: 3}
-  hashCS: {fileID: 0}
+  hashCS: {fileID: 7200000, guid: 21c48cbfe08bf6243b9ed40e3a1b491f, type: 3}
   MouseInteractionRadius: 1.5
   initParticleWay: 0
-  ballRadius: 0.1
+  ballRadius: 5
   separationFactor: 1.4
   volume: 1
 --- !u!114 &4507585079103403238
