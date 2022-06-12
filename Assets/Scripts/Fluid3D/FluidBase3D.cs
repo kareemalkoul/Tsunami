@@ -48,7 +48,7 @@ namespace Kareem.Fluid.SPH
         [SerializeField]
         public bool addedForce = false;
 
-        [HideInInspector, SerializeField]
+        [SerializeField]
         public float moveForce = 0.08f;
         private  bool wave = true;
         private Vector3 rangeCompare = new Vector3(1, 1, 1);
@@ -56,7 +56,7 @@ namespace Kareem.Fluid.SPH
         [SerializeField]
         public float tensionThreshold = 0.7f;
 
-        [SerializeField, HideInInspector]
+        [SerializeField]
         public float tensionCoefficient = 0.0728f;
 
         [SerializeField, Range(0.0f, 1.0f), HideInInspector]

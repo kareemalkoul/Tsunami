@@ -312,7 +312,7 @@ public class PauseMenu : MonoBehaviour
 
     public void DimensionsField(String input)
     {
-        fluid.dimensions = int.Parse(input.Trim());
+        fluid.dimensions = int.Parse(Dimensions.text.Trim());
     }
 
     public void MaxParticlesField(String input)
@@ -322,12 +322,12 @@ public class PauseMenu : MonoBehaviour
 
     public void TensionCoeffientField(String input)
     {
-        fluid.separationFactor = float.Parse(TensionCoeffient.text.Trim());
+        fluid.tensionCoefficient = float.Parse(TensionCoeffient.text.Trim());
     }
 
     public void TensionThersholdField(String input)
     {
-        fluid.separationFactor = float.Parse(TensionThershold.text.Trim());
+        fluid.tensionThreshold = float.Parse(TensionThershold.text.Trim());
     }
 
     // public void SphereRaduisField(String input)
@@ -347,7 +347,7 @@ public class PauseMenu : MonoBehaviour
 
     public void MoveForceField(String input)
     {
-        fluid.separationFactor = float.Parse(MoveForce.text.Trim());
+        fluid.moveForce = float.Parse(MoveForce.text.Trim());
     }
 
     #endregion
