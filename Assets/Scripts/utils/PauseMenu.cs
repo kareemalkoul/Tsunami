@@ -68,6 +68,8 @@ public class PauseMenu : MonoBehaviour
         {
             ChangeGameState();
         }
+
+        Stop();
     }
 
     public void DropDwonWithParticlesEnum(Dropdown dropdown, Enum targetEnum) //You can populate any dropdown with any enum with this method
@@ -188,6 +190,14 @@ public class PauseMenu : MonoBehaviour
     public void Restart()
     {
         Application.LoadLevel(Application.loadedLevel);
+    }
+
+    public void Stop()
+    {
+        if (Input.GetKeyDown(KeyCode.Space))
+        {
+            fluid.simulate = !fluid.simulate;
+        }
     }
     //Ouput the new value of the Dropdown into Text
     #endregion
