@@ -46,6 +46,14 @@ namespace Kareem.Fluid.SPH
         public bool simulate = true; // Simulation execution or stop for a while
 
         [SerializeField]
+        protected bool addedForce = false;
+
+        [SerializeField]
+        float force = 0.05f;
+        private  bool wave = true;
+        private Vector3 rangeCompare = new Vector3(1, 1, 1);
+
+        [SerializeField]
         public float tensionThreshold = 0.7f;
 
         [SerializeField, HideInInspector]
@@ -127,8 +135,28 @@ namespace Kareem.Fluid.SPH
         {
             InitBuffers();
             InitProfilling();
+            rangeCompare = range + force * Vector3.one;
         }
 
+        private void MoveWall(){
+            if(addedForce){
+              
+                if(range.x <= rangeCompare.x-2){ 
+                       wave = false;
+                }
+                if(range.x >= rangeCompare.x){  
+                  
+                     addedForce =false;
+                     wave = true;
+                }
+                if(range.x > rangeCompare.x-2  && wave) {
+                        range.x -= force;
+                }
+                if(range.x < rangeCompare.x && !wave) { 
+                       range.x += force;
+                }
+            }
+        }
         private void Update()
         {
             //this condition for stop simulation for a time
@@ -137,6 +165,7 @@ namespace Kareem.Fluid.SPH
                 return;
             }
 
+            MoveWall();
             //if maxAllowableTimestep is more than the delta time between curr frame and prev frame
             //then make time step is delta time
             //this maintaple happen when the maxAllowableTimestep is big than deltaTime
