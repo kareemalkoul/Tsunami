@@ -3,11 +3,6 @@ struct Particle {
 	float3 position;
 	float3 velocity;
 };
-
-struct ParticlePressure {
-	float pressure;
-};
-
 struct ParticleForces {
 	float3 acceleration;
 };

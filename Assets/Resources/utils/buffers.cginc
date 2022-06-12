@@ -6,7 +6,6 @@ RWStructuredBuffer<Particle> _ParticlesBuffer;
 RWStructuredBuffer<ParticleDensity> _ParticlesDensityBuffer;
 
 // Buffer to hold particle pressure
-RWStructuredBuffer<ParticlePressure> _ParticlesPressureBuffer;
 
 // Buffer that holds particle acceleration (force)
 RWStructuredBuffer<ParticleForces>  _ParticlesForceBuffer;

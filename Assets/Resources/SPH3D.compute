@@ -23,17 +23,9 @@
 // ▼ Kernel function
 
 //--------------------------------------------------------------------------------------
-// Density andd pressure calculation
+// Density calculation
 //--------------------------------------------------------------------------------------
 
-void Pressure(uint P_ID) {
-
-	float  P_density = _ParticlesDensityBuffer[P_ID].density;	// Density calculated earlier
-	float  P_pressure = CalculatePressure(P_density);	// Pressure calculation
-
-	// Update pressure buffer
-	_ParticlesPressureBuffer[P_ID].pressure = P_pressure;
-}
 [numthreads(THREAD_SIZE_X, 1, 1)]
 void DensityCS(uint3 DTid : SV_DispatchThreadID) {
 	uint P_ID = DTid.x;	// Particle ID currently being processed
@@ -54,7 +46,6 @@ void DensityCS(uint3 DTid : SV_DispatchThreadID) {
 
 	// Update density buffer
 	_ParticlesDensityBuffer[P_ID].density = density;
-	Pressure(P_ID);
 }
 
 
@@ -68,7 +59,7 @@ void ForceCS(uint3 DTid : SV_DispatchThreadID) {
 	float3 P_position = _ParticlesBuffer[P_ID].position;
 	float3 P_velocity = _ParticlesBuffer[P_ID].velocity;
 	float  P_density = _ParticlesDensityBuffer[P_ID].density;		// Density calculated earlier
-	float  P_pressure = _ParticlesPressureBuffer[P_ID].pressure;	// The pressure calculated earlier
+	float  P_pressure = CalculatePressure(P_density);	// The pressure calculated earlier
 
 	const float h_sq = _Smoothlen * _Smoothlen;
 
@@ -86,7 +77,7 @@ void ForceCS(uint3 DTid : SV_DispatchThreadID) {
 		float r_sq = dot(diff, diff);
 
 		float  N_density = _ParticlesDensityBuffer[neighbourIndex].density;
-		float  N_pressure = _ParticlesPressureBuffer[neighbourIndex].pressure;
+		float  N_pressure = CalculatePressure(N_density);
 		float3 N_velocity = _ParticlesBuffer[neighbourIndex].velocity;
 		float  r = sqrt(r_sq);
 

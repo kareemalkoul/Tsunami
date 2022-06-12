@@ -90,7 +90,6 @@ namespace Kareem.Fluid.SPH
         ComputeShader hashCS;
         private static readonly int THREAD_SIZE_X = 1024; // Number of threads on the compute shader side
         private ComputeBuffer particlesBuffer; // Buffer to hold particle data
-        private ComputeBuffer particlesPressureBuffer; // A buffer that holds particle pressure dataA buffer that holds particle pressure data
         private ComputeBuffer particleDensitiesBuffer; // Buffer that holds particle density data
         private ComputeBuffer particleForcesBuffer; // Buffer that holds particle acceleration data
         private ComputeBuffer NeighbourListBuffer;
@@ -102,7 +101,6 @@ namespace Kareem.Fluid.SPH
         private CustomSampler HashProfiling;
         private CustomSampler DesnsityProfiling;
 
-        private CustomSampler PressureProfiling;
         private CustomSampler ForceProfiling;
         private CustomSampler IntegrateProfiling;
 
@@ -271,7 +269,6 @@ namespace Kareem.Fluid.SPH
 
             fluidCS.SetBuffer(kernelID, "_ParticlesBuffer", particlesBuffer);
             fluidCS.SetBuffer(kernelID, "_ParticlesDensityBuffer", particleDensitiesBuffer);
-            fluidCS.SetBuffer(kernelID, "_ParticlesPressureBuffer", particlesPressureBuffer);
             fluidCS.Dispatch(kernelID, threadGroupsX, 1, 1);
             DesnsityProfiling.End();
 
@@ -283,7 +280,6 @@ namespace Kareem.Fluid.SPH
 
             fluidCS.SetBuffer(kernelID, "_ParticlesBuffer", particlesBuffer);
             fluidCS.SetBuffer(kernelID, "_ParticlesDensityBuffer", particleDensitiesBuffer);
-            fluidCS.SetBuffer(kernelID, "_ParticlesPressureBuffer", particlesPressureBuffer);
             fluidCS.SetBuffer(kernelID, "_ParticlesForceBuffer", particleForcesBuffer);
             fluidCS.Dispatch(kernelID, threadGroupsX, 1, 1);
             ForceProfiling.End();
@@ -343,10 +339,6 @@ namespace Kareem.Fluid.SPH
             particlesBuffer.SetData(particles);
             particles = null;
 
-            particlesPressureBuffer = new ComputeBuffer(
-                numParticles,
-                Marshal.SizeOf(typeof(FluidParticlePressure))
-            );
             particleForcesBuffer = new ComputeBuffer(
                 numParticles,
                 Marshal.SizeOf(typeof(FluidParticleForces3D))
@@ -384,7 +376,6 @@ namespace Kareem.Fluid.SPH
         protected void DeleteBuffers()
         {
             DeleteBuffer(particlesBuffer);
-            DeleteBuffer(particlesPressureBuffer);
             DeleteBuffer(particleDensitiesBuffer);
             DeleteBuffer(particleForcesBuffer);
 
@@ -398,7 +389,6 @@ namespace Kareem.Fluid.SPH
         {
             HashProfiling = CustomSampler.Create("kareem/Hash");
             DesnsityProfiling = CustomSampler.Create("kareem/Desnsity");
-            PressureProfiling = CustomSampler.Create("kareem/Pressure");
             ForceProfiling = CustomSampler.Create("kareem/Force");
             IntegrateProfiling = CustomSampler.Create("kareem/Integrate");
         }
