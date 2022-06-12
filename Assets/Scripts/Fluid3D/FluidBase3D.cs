@@ -46,10 +46,10 @@ namespace Kareem.Fluid.SPH
         public bool simulate = true; // Simulation execution or stop for a while
 
         [SerializeField]
-        protected bool addedForce = false;
+        public bool addedForce = false;
 
-        [SerializeField]
-        float force = 0.05f;
+        [HideInInspector, SerializeField]
+        public float moveForce = 0.08f;
         private  bool wave = true;
         private Vector3 rangeCompare = new Vector3(1, 1, 1);
 
@@ -135,7 +135,7 @@ namespace Kareem.Fluid.SPH
         {
             InitBuffers();
             InitProfilling();
-            rangeCompare = range + force * Vector3.one;
+            rangeCompare = range + moveForce * Vector3.one;
         }
 
         private void MoveWall(){
@@ -150,10 +150,10 @@ namespace Kareem.Fluid.SPH
                      wave = true;
                 }
                 if(range.x > rangeCompare.x-2  && wave) {
-                        range.x -= force;
+                        range.x -= moveForce;
                 }
                 if(range.x < rangeCompare.x && !wave) { 
-                       range.x += force;
+                       range.x += moveForce;
                 }
             }
         }

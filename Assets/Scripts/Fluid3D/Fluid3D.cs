@@ -33,8 +33,6 @@ namespace Kareem.Fluid.SPH
         [HideInInspector, SerializeField]
         private float volume = 1;
 
-        [HideInInspector, SerializeField]
-        public float moveForce = 0.08f;
 
         ///finish Hide Fields
         ///

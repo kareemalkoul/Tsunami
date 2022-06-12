@@ -209,7 +209,7 @@ public class PauseMenu : MonoBehaviour
     {
         if (Input.GetKeyDown(KeyCode.P))
         {
-            fluid.MoveWall();
+            fluid.addedForce=true;
         }
     }
     //Ouput the new value of the Dropdown into Text

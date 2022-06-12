@@ -36,6 +36,7 @@ namespace Kareem.Fluid.SPH
         {
             Rendering.Begin();
             DrawParticle();
+            changePostionLines();
             Rendering.End();
         }
 
@@ -73,21 +74,6 @@ namespace Kareem.Fluid.SPH
 
         void DrawBounds()
         {
-            // Debug.DrawLine(Start, Start + EndX, colorBoundry);
-            // Debug.DrawLine(Start, Start + EndY, colorBoundry);
-            // Debug.DrawLine(Start, Start + EndZ, colorBoundry);
-
-            // Debug.DrawLine(Start + EndXYZ, Start + EndXZ, colorBoundry);
-            // Debug.DrawLine(Start + EndXYZ, Start + EndXY, colorBoundry);
-            // Debug.DrawLine(Start + EndXYZ, Start + EndYZ, colorBoundry);
-
-            // Debug.DrawLine(Start + EndXY, Start + EndX, colorBoundry);
-            // Debug.DrawLine(Start + EndXY, Start + EndY, colorBoundry);
-
-            // Debug.DrawLine(Start + EndXZ, Start + EndX, colorBoundry);
-            // Debug.DrawLine(Start + EndXZ, Start + EndZ, colorBoundry);
-            // Debug.DrawLine(Start + EndYZ, Start + EndY, colorBoundry);
-            // Debug.DrawLine(Start + EndYZ, Start + EndZ, colorBoundry);
             DrawLines();
         }
 
@@ -109,38 +95,74 @@ namespace Kareem.Fluid.SPH
             Vector3 EndXYZ = EndX + EndY + EndZ;
 
             Color colorBoundry = Color.blue;
-            DrawLine(Start, Start + EndX, colorBoundry);
-            DrawLine(Start, Start + EndY, colorBoundry);
-            DrawLine(Start, Start + EndZ, colorBoundry);
+            DrawLine(Start, colorBoundry);
+            DrawLine(Start, colorBoundry);
+            DrawLine(Start, colorBoundry);
 
-            DrawLine(Start + EndXYZ, Start + EndXZ, colorBoundry);
-            DrawLine(Start + EndXYZ, Start + EndXY, colorBoundry);
-            DrawLine(Start + EndXYZ, Start + EndYZ, colorBoundry);
+            DrawLine(Start + EndXY, colorBoundry);
+            DrawLine(Start + EndXY, colorBoundry);
+            DrawLine(Start + EndXY, colorBoundry);
 
-            DrawLine(Start + EndXY, Start + EndX, colorBoundry);
-            DrawLine(Start + EndXY, Start + EndY, colorBoundry);
+            DrawLine(Start + EndXY, colorBoundry);
+            DrawLine(Start + EndXY, colorBoundry);
 
-            DrawLine(Start + EndXZ, Start + EndX, colorBoundry);
-            DrawLine(Start + EndXZ, Start + EndZ, colorBoundry);
-            DrawLine(Start + EndYZ, Start + EndY, colorBoundry);
-            DrawLine(Start + EndYZ, Start + EndZ, colorBoundry);
+            DrawLine(Start + EndXZ, colorBoundry);
+            DrawLine(Start + EndXZ, colorBoundry);
+            DrawLine(Start + EndYZ, colorBoundry);
+            DrawLine(Start + EndYZ, colorBoundry);
         }
 
-        void DrawLine(Vector3 start, Vector3 end, Color color, float duration = 0.2f)
+        void DrawLine(Vector3 pos, Color color)
         {
             GameObject myLine = new GameObject("Lines");
-            myLine.transform.position = start;
+            myLine.transform.position = pos;
             myLine.AddComponent<LineRenderer>();
             LineRenderer lr = myLine.GetComponent<LineRenderer>();
             lr.numCornerVertices = 10;
-            // lr.material = new Material(Shader.Find("Particles/Alpha Blended Premultiply"));
             lr.SetColors(color, color);
             lr.SetWidth(0.1f, 0.1f);
-            lr.SetPosition(0, start);
-            lr.SetPosition(1, end);
             Lines.Add(lr);
             myLine.transform.parent = transform;
-            // GameObject.Destroy(myLine, duration);
+        }
+
+        void SetLinePosition(Vector3 start, Vector3 end, LineRenderer lr)
+        {  
+            lr.SetPosition(0, start);
+            lr.SetPosition(1, end);
+        }
+
+        public void changePostionLines()
+        {
+            Vector3 offset = Vector3.zero;
+            Vector3 range = solver.Range;
+
+            Vector3 Start = new Vector3(offset.x, offset.y, offset.z);
+
+            Vector3 EndX = new Vector3(range.x, 0, 0);
+            Vector3 EndY = new Vector3(0, range.y, 0);
+            Vector3 EndZ = new Vector3(0, 0, range.z);
+
+            Vector3 EndXZ = EndX + EndZ;
+            Vector3 EndXY = EndX + EndY;
+            Vector3 EndYZ = EndZ + EndY;
+
+            Vector3 EndXYZ = EndX + EndY + EndZ;
+
+            SetLinePosition(Start, Start + EndX, Lines[0]);
+            SetLinePosition(Start, Start + EndY, Lines[1]);
+            SetLinePosition(Start, Start + EndZ, Lines[2]);
+
+            SetLinePosition(Start + EndXYZ, Start + EndXZ, Lines[3]);
+            SetLinePosition(Start + EndXYZ, Start + EndXY, Lines[4]);
+            SetLinePosition(Start + EndXYZ, Start + EndYZ, Lines[5]);
+
+            SetLinePosition(Start + EndXY, Start + EndX, Lines[6]);
+            SetLinePosition(Start + EndXY, Start + EndY, Lines[7]);
+
+            SetLinePosition(Start + EndXZ, Start + EndX, Lines[8]);
+            SetLinePosition(Start + EndXZ, Start + EndZ, Lines[9]);
+            SetLinePosition(Start + EndYZ, Start + EndY, Lines[10]);
+            SetLinePosition(Start + EndYZ, Start + EndZ, Lines[11]);
         }
 
         public void DrawPlanes()
