@@ -3,6 +3,7 @@ using System.Collections;
 using UnityEngine.Profiling;
 using System.Collections.Generic;
 
+
 namespace Kareem.Fluid.SPH
 {
     [RequireComponent(typeof(Fluid3D))]
@@ -14,7 +15,7 @@ namespace Kareem.Fluid.SPH
 
         public Fluid3D solver;
         public Material RenderParticleMat;
-        public Color WaterColor;
+        // public Color WaterColor;
         public bool IsRenderInShader = true;
         public bool IsBoundsDrawed = true;
 
@@ -43,8 +44,9 @@ namespace Kareem.Fluid.SPH
         void DrawParticle()
         {
             float radius = 0.1f;
+            Color WaterColor = Color.blue;
             RenderParticleMat.SetPass(0);
-            RenderParticleMat.SetColor("_WaterColor", WaterColor);
+            // RenderParticleMat.SetColor("_WaterColor", WaterColor);
             RenderParticleMat.SetBuffer("_ParticlesBuffer", solver.ParticlesBuffer);
             // RenderParticleMat.SetFloat("_ParticleRadius", solver.BallRadius);
 
@@ -55,11 +57,11 @@ namespace Kareem.Fluid.SPH
             }
             else
             {
-                DrawByExtension(radius);
+                DrawByExtension(radius, WaterColor);
             }
         }
 
-        void DrawByExtension(float radius)
+        void DrawByExtension(float radius, Color WaterColor)
         {
             GetDate.Begin();
             FluidParticle3D[] particles = new FluidParticle3D[solver.NumParticles];
