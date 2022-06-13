@@ -27,7 +27,7 @@ namespace Kareem.Fluid.SPH
                 Lines = new List<LineRenderer>();
                 DrawBounds();
             }
-            DrawPlanes();
+            // DrawPlanes();
             // GameObject plane = GameObject.CreatePrimitive(PrimitiveType.Plane);
             // plane.transform.position
         }
