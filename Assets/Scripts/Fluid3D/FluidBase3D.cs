@@ -125,6 +125,10 @@ namespace Kareem.Fluid.SPH
 
         protected virtual void Start()
         {
+            var res = Screen.currentResolution;
+            print(res);
+            // float ratio = (float)res.width/res.height;
+            // print(ratio);
             InitBuffers();
             InitProfilling();
         }
