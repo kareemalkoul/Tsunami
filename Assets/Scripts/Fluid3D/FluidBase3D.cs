@@ -133,6 +133,7 @@ namespace Kareem.Fluid.SPH
         {
             var res = Screen.currentResolution;
             print(res);
+            QualitySettings.vSyncCount = 0;
             // float ratio = (float)res.width/res.height;
             // print(ratio);
             InitBuffers();

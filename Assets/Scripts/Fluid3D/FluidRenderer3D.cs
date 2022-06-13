@@ -3,7 +3,6 @@ using System.Collections;
 using UnityEngine.Profiling;
 using System.Collections.Generic;
 
-
 namespace Kareem.Fluid.SPH
 {
     [RequireComponent(typeof(Fluid3D))]
@@ -12,9 +11,10 @@ namespace Kareem.Fluid.SPH
         public List<LineRenderer> Lines;
         private CustomSampler Rendering;
         private CustomSampler GetDate;
-
+        public GameObject Planes;
         public Fluid3D solver;
         public Material RenderParticleMat;
+
         // public Color WaterColor;
         public bool IsRenderInShader = true;
         public bool IsBoundsDrawed = true;
@@ -38,7 +38,13 @@ namespace Kareem.Fluid.SPH
             Rendering.Begin();
             DrawParticle();
             changePostionLines();
+            ScalePlanes();
             Rendering.End();
+        }
+
+        void ScalePlanes()
+        {
+            Planes.transform.localScale = solver.range*(1/20f);
         }
 
         void DrawParticle()
@@ -128,7 +134,7 @@ namespace Kareem.Fluid.SPH
         }
 
         void SetLinePosition(Vector3 start, Vector3 end, LineRenderer lr)
-        {  
+        {
             lr.SetPosition(0, start);
             lr.SetPosition(1, end);
         }
