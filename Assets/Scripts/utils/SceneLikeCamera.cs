@@ -157,7 +157,7 @@ namespace Kareem.Fluid.SPH
                 camera.transform.RotateAround(camera.transform.position, Vector3.up, mouseMoveX * rotationSpeed);
             }
 
-            camera.transform.Translate(move);
+            camera.transform.Translate(25*move*Time.deltaTime);
 
             //Scroll to zoom
             float mouseScroll = Input.GetAxis(zoomAxis);

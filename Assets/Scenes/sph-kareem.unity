@@ -2066,8 +2066,24 @@ PrefabInstance:
       value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 3940404416909209042, guid: 9571e6baab469384e9372a4150288837, type: 3}
+      propertyPath: range.x
+      value: 40
+      objectReference: {fileID: 0}
+    - target: {fileID: 3940404416909209042, guid: 9571e6baab469384e9372a4150288837, type: 3}
+      propertyPath: range.y
+      value: 40
+      objectReference: {fileID: 0}
+    - target: {fileID: 3940404416909209042, guid: 9571e6baab469384e9372a4150288837, type: 3}
       propertyPath: smoothlen
       value: 0.5
+      objectReference: {fileID: 0}
+    - target: {fileID: 3940404416909209042, guid: 9571e6baab469384e9372a4150288837, type: 3}
+      propertyPath: particleNum
+      value: 65536
+      objectReference: {fileID: 0}
+    - target: {fileID: 3940404416909209042, guid: 9571e6baab469384e9372a4150288837, type: 3}
+      propertyPath: initParticleWay
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 4507585079103403238, guid: 9571e6baab469384e9372a4150288837, type: 3}
       propertyPath: Planes
@@ -3823,7 +3839,7 @@ Camera:
     width: 1
     height: 1
   near clip plane: 0.3
-  far clip plane: 100
+  far clip plane: 300
   field of view: 60
   orthographic: 0
   orthographic size: 5
@@ -8588,7 +8604,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 1}
   m_AnchorMax: {x: 0, y: 1}
-  m_AnchoredPosition: {x: 444, y: -249.8}
+  m_AnchoredPosition: {x: 444, y: -249.79999}
   m_SizeDelta: {x: 890, y: 499.6}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1115475683

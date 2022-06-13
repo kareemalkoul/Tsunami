@@ -126,6 +126,8 @@ void IntegrateCS(uint3 DTid : SV_DispatchThreadID) {
 
 	// Wall boundary
 	acceleration=penaltyWallboundray(acceleration,position);
+	acceleration=buildings(acceleration,position,3,8,20,30);
+	acceleration=buildings(acceleration,position,12,16,20,30);
 
 	// Gravity addition
 	//TODO:must _Gravity*_mass

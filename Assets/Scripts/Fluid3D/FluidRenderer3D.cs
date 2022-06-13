@@ -28,6 +28,9 @@ namespace Kareem.Fluid.SPH
                 Lines = new List<LineRenderer>();
                 DrawBounds();
             }
+            ScalePlanes();
+            DrawBuilding(8,3, 30, 20);
+            DrawBuilding(16,12,30,20);
             // DrawPlanes();
             // GameObject plane = GameObject.CreatePrimitive(PrimitiveType.Plane);
             // plane.transform.position
@@ -38,13 +41,12 @@ namespace Kareem.Fluid.SPH
             Rendering.Begin();
             DrawParticle();
             changePostionLines();
-            ScalePlanes();
             Rendering.End();
         }
 
         void ScalePlanes()
         {
-            Planes.transform.localScale = solver.range*(1/20f);
+            Planes.transform.localScale = solver.range * (1 / 20f);
         }
 
         void DrawParticle()
@@ -193,6 +195,32 @@ namespace Kareem.Fluid.SPH
             DrawPlane(Start, EndZ, EndXZ, EndX);
             DrawPlane(Start, EndY, EndYZ, EndZ);
             DrawPlane(EndZ, EndYZ, EndXYZ, EndXZ);
+        }
+
+        void DrawBuilding(float zmax, float zmin, float xmax, float xmin)
+        {
+            Vector3 range = solver.Range;
+
+            Vector3 Start = new Vector3(xmin, 0, zmin);
+            Vector3 End = new Vector3(xmax, range.y, zmax);
+
+            Vector3 EndX = new Vector3(xmax, 0, zmin);
+            Vector3 EndY = new Vector3(xmin, range.y, zmin);
+            Vector3 EndZ = new Vector3(xmin, 0, zmax);
+
+            Vector3 EndXZ = new Vector3(End.x, 0, zmax);
+            Vector3 EndXY = new Vector3(xmax, range.y, zmin);
+            Vector3 EndYZ =new Vector3(xmin, range.y, zmax);
+
+            DrawPlane(Start,EndZ,EndYZ,EndY);
+            DrawPlane(Start,EndY,EndXY,EndX);
+
+            DrawPlane(EndZ,EndXZ,End,EndYZ);
+            DrawPlane(EndX,EndXY,End,EndXZ);
+
+
+
+           
         }
 
         void DrawPlane(Vector3 p1, Vector3 p2, Vector3 p3, Vector3 p4)

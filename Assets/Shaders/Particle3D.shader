@@ -85,7 +85,7 @@ Shader "Custom/SPH3D" {
 	float ov(float2 p) {
     float v = 0.0;
     float a = 0.4;
-    for (int i = 0;i<10;i++) {
+    for (int i = 0;i<3;i++) {
         v+= voronoi(p)*a;
         p*=2.0;
         a*=0.5;
