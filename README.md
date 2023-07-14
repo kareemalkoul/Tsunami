@@ -14,7 +14,8 @@ To achieve this, shaders will be employed to calculate the physics equations, Vo
 
 # Demo
 
-https://user-images.githubusercontent.com/26988372/147722504-cd28fa0f-b3d7-4e41-b323-d4fe2b34376f.mp4
+
+https://github.com/kareemalkoul/Tsunami/assets/25280164/ee76ca96-e05e-4854-9d2a-2b594d30bf54
 
 
-#
+
