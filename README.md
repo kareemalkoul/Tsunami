@@ -12,10 +12,13 @@ The project aims to depict a tsunami scene in the middle of the sea, generating 
 
 To achieve this, shaders will be employed to calculate the physics equations, Voronoi will be used to create the sea view, and collision equations will be implemented to handle particle interactions with boundaries.
 
+# Report
+
+The report describes the physics and laws are used, The report in Arabic.
+
+[Tasunami-SPH.pdf](https://github.com/kareemalkoul/Tsunami/files/12060774/Tasunami-SPH.pdf)
+
 # Demo
 
 
 https://github.com/kareemalkoul/Tsunami/assets/25280164/ee76ca96-e05e-4854-9d2a-2b594d30bf54
-
-
-
