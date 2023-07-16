@@ -20,5 +20,4 @@ The report describes the physics and laws are used, The report in Arabic.
 
 # Demo
 
-
 https://github.com/kareemalkoul/Tsunami/assets/25280164/ee76ca96-e05e-4854-9d2a-2b594d30bf54
