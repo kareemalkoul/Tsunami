@@ -12,7 +12,6 @@ The project aims to depict a tsunami scene in the middle of the sea, generating 
 
 To achieve this, shaders will be employed to calculate the physics equations, Voronoi will be used to create the sea view, and collision equations will be implemented to handle particle interactions with boundaries.
 
-
 # Report
 
 The report describes the physics and laws are used, The report in Arabic.
